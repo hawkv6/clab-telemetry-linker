@@ -3,11 +3,10 @@ package cmd
 import (
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-)
 
-var log = logrus.New()
+	"github.com/hawkv6/clab-mdt-linker/pkg/logging"
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "clab-mdt-linker",
@@ -47,17 +46,16 @@ More information: https://containerlab.dev/cmd/tools/netem/set/
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalln(err)
+		logging.DefaultLogger.Fatalln(err)
 	}
 }
 
 func init() {
-	log.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
 	checkIsRoot()
 }
 
 func checkIsRoot() {
 	if os.Geteuid() != 0 {
-		log.Fatalln("Hawkwing must be run as root")
+		logging.DefaultLogger.Fatalln("Hawkwing must be run as root")
 	}
 }
