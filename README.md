@@ -1,2 +1,2 @@
-# clab-mdt-linker
-The clab-mdt-linker service enriches MDT data with the applied containerlab impairments
+# clab-telemetry-linker
+The clab-telemetry-linker service enriches telemetry data (YANG PUSH / model driven telemetry) with the applied containerlab impairments

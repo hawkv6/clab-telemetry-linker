@@ -1,4 +1,4 @@
-module github.com/hawkv6/clab-mdt-linker
+module github.com/hawkv6/clab-telemetry-linker
 
 go 1.20
 
