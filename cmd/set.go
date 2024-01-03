@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/hawkv6/clab-telemetry-linker/pkg/command"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
+	"github.com/hawkv6/clab-telemetry-linker/pkg/impairments"
 	"github.com/spf13/cobra"
 )
 
@@ -19,23 +19,15 @@ var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set impairments on a containerlab interface",
 	Run: func(cmd *cobra.Command, args []string) {
-		command.CreateBasicCommand(Node, Interface)
+		manager := impairments.NewDefaultImpairmentsManager(config.NewDefaultConfig(), Node, Interface)
+		manager.SetDelay(Delay)
+		manager.SetJitter(Jitter)
+		manager.SetLoss(Loss)
+		manager.SetRate(Rate)
+		manager.ApplyImpairments()
 
-		config.SetPrefix(Node, Interface)
-		config.SetDelay(Delay)
-		config.SetJitter(Jitter)
-		config.SetLoss(Loss)
-		config.SetRate(Rate)
-
-		command.AddDelay(Delay)
-		command.AddJitter(Jitter)
-		command.AddLoss(Loss)
-		command.AddRate(Rate)
-		command.ExecuteCommand()
-
-		if err := config.WriteConfig(); err != nil {
-			command.CreateBasicCommand(Node, Interface)
-			command.ExecuteCommand()
+		if err := manager.WriteConfig(); err != nil {
+			manager.DeleteImpairments()
 			log.Fatalf("All settings reverted due to error: %v\n", err)
 		}
 	},

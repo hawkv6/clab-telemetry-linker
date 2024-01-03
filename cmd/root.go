@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
+	"github.com/hawkv6/clab-telemetry-linker/pkg/helpers"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
 )
 
@@ -44,13 +44,14 @@ var rootCmd = &cobra.Command{
 	More information: https://containerlab.dev/cmd/tools/netem/set/
 	`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		config.InitConfig()
+		if !helpers.IsRoot() {
+			log.Fatalln("You must be root to run this command")
+		}
 	},
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
-		logging.DefaultLogger.Fatalln(err)
 	}
 }
