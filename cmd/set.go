@@ -24,10 +24,18 @@ var setCmd = &cobra.Command{
 		manager.SetJitter(Jitter)
 		manager.SetLoss(Loss)
 		manager.SetRate(Rate)
-		manager.ApplyImpairments()
+		if err := manager.ApplyImpairments(); err != nil {
+			log.Error("Error applying impairments")
+			if err := manager.DeleteImpairments(); err != nil {
+				log.Fatalf("Error reverting impairments: %v\n", err)
+			}
+			log.Fatalf("All settings reverted due to error: %v\n", err)
+		}
 
 		if err := manager.WriteConfig(); err != nil {
-			manager.DeleteImpairments()
+			if err := manager.DeleteImpairments(); err != nil {
+				log.Fatalf("Error reverting impairments: %v\n", err)
+			}
 			log.Fatalf("All settings reverted due to error: %v\n", err)
 		}
 	},

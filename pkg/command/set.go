@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
@@ -16,8 +15,8 @@ type SetCommand interface {
 	AddJitter(uint64)
 	AddLoss(float64)
 	AddRate(uint64)
-	ApplyImpairments()
-	DeleteImpairments()
+	ApplyImpairments() error
+	DeleteImpairments() error
 }
 
 type DefaultSetCommand struct {
@@ -68,19 +67,20 @@ func (command *DefaultSetCommand) AddRate(rate uint64) {
 	}
 }
 
-func (command *DefaultSetCommand) executeCommand(cmd *exec.Cmd) {
+func (command *DefaultSetCommand) executeCommand(cmd *exec.Cmd) error {
 	command.log.Debugf("Execute Command: %s\n", cmd)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Aborting... Following Error happened: %v", err)
+		return fmt.Errorf("Aborting... Following Error happened: %v", err)
 	}
 	fmt.Printf("%s\n", output)
+	return nil
 }
 
-func (command *DefaultSetCommand) ApplyImpairments() {
-	command.executeCommand(command.fullCommand)
+func (command *DefaultSetCommand) ApplyImpairments() error {
+	return command.executeCommand(command.fullCommand)
 }
 
-func (command *DefaultSetCommand) DeleteImpairments() {
-	command.executeCommand(command.basicCommand)
+func (command *DefaultSetCommand) DeleteImpairments() error {
+	return command.executeCommand(command.basicCommand)
 }

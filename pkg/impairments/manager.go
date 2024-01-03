@@ -80,12 +80,12 @@ func (manager *DefaultImpairmentsManager) SetRate(rate uint64) {
 	}
 }
 
-func (manager *DefaultImpairmentsManager) ApplyImpairments() {
-	manager.command.ApplyImpairments()
+func (manager *DefaultImpairmentsManager) ApplyImpairments() error {
+	return manager.command.ApplyImpairments()
 }
 
-func (manager *DefaultImpairmentsManager) DeleteImpairments() {
-	manager.command.DeleteImpairments()
+func (manager *DefaultImpairmentsManager) DeleteImpairments() error {
+	return manager.command.DeleteImpairments()
 }
 
 func (manager *DefaultImpairmentsManager) WriteConfig() error {
