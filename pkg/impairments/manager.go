@@ -23,7 +23,7 @@ type ImpairmentsManager interface {
 type DefaultImpairmentsManager struct {
 	log               *logrus.Entry
 	config            config.Config
-	command           command.Command
+	command           command.SetCommand
 	impairmentsPrefix string
 }
 
