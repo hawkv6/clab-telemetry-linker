@@ -587,20 +587,17 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			helper := helpers.NewMockHelper(ctrl)
-			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey)
+			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey).AnyTimes()
+			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName).AnyTimes()
 			if tt.want.userHome == "" {
 				helper.EXPECT().GetUserHome().Return(errors.New("artificial error"), "")
 			} else {
 				helper.EXPECT().GetUserHome().Return(nil, tt.want.userHome)
 			}
 			if tt.wantError {
-				if tt.want.userHome == "/root" {
-					helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
-				}
 				err, _ := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
 				assert.Error(t, err)
 			} else {
-				helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
 				err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
 				assert.NoError(t, err)
 				assert.NotNil(t, defaultConfig)

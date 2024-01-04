@@ -87,9 +87,11 @@ func (mr *MockSetCommandMockRecorder) AddRate(arg0 any) *gomock.Call {
 }
 
 // ApplyImpairments mocks base method.
-func (m *MockSetCommand) ApplyImpairments() {
+func (m *MockSetCommand) ApplyImpairments() error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ApplyImpairments")
+	ret := m.ctrl.Call(m, "ApplyImpairments")
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // ApplyImpairments indicates an expected call of ApplyImpairments.
@@ -99,9 +101,11 @@ func (mr *MockSetCommandMockRecorder) ApplyImpairments() *gomock.Call {
 }
 
 // DeleteImpairments mocks base method.
-func (m *MockSetCommand) DeleteImpairments() {
+func (m *MockSetCommand) DeleteImpairments() error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeleteImpairments")
+	ret := m.ctrl.Call(m, "DeleteImpairments")
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // DeleteImpairments indicates an expected call of DeleteImpairments.
