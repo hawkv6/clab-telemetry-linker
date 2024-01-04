@@ -189,23 +189,34 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 		fullFileLocation string
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		exists bool
+		name      string
+		fields    fields
+		exists    bool
+		wantError bool
 	}{
 		{
 			name: "Test with file which exists",
 			fields: fields{
 				fullFileLocation: "/",
 			},
-			exists: true,
+			exists:    true,
+			wantError: false,
 		},
 		{
 			name: "Test with file which doesn't exists",
 			fields: fields{
 				fullFileLocation: "/doesnotexist",
 			},
-			exists: false,
+			wantError: false,
+			exists:    false,
+		},
+		{
+			name: "Test with file without permissions",
+			fields: fields{
+				fullFileLocation: "/root/.profile",
+			},
+			wantError: true,
+			exists:    true,
 		},
 	}
 	for _, tt := range tests {
@@ -215,8 +226,12 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 				fullFileLocation: tt.fields.fullFileLocation,
 			}
 			err, exists := config.doesConfigExist()
-			assert.Nil(t, err)
-			assert.Equal(t, tt.exists, exists)
+			if tt.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.exists, exists)
+			}
 		})
 	}
 }
@@ -240,10 +255,18 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name: "Test invalid file creation",
+			name: "Test invalid folder creation",
 			fields: fields{
 				configPath:       "/root/hawkv6",
 				fullFileLocation: "/root/hawkv6/config.yaml",
+			},
+			wantError: true,
+		},
+		{
+			name: "Test invalid file creation",
+			fields: fields{
+				configPath:       "/",
+				fullFileLocation: "/config.yaml",
 			},
 			wantError: true,
 		},
@@ -336,6 +359,20 @@ func TestDefaultConfig_initConfig(t *testing.T) {
 			},
 			wantError: true,
 		},
+		{
+			name: "Test with file without permissions",
+			fields: fields{
+				fullFileLocation: "/root/.profile",
+			},
+			wantError: true,
+		},
+		{
+			name: "Test non parseable config",
+			fields: fields{
+				fullFileLocation: "/root",
+			},
+			wantError: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -379,7 +416,7 @@ func TestDefaultConfig_SetValue(t *testing.T) {
 				log:           logging.DefaultLogger.WithField("subsystem", "config_test"),
 				koanfInstance: koanf.New("."),
 			}
-			config.SetValue(tt.args.key, tt.args.value)
+			assert.NoError(t, config.SetValue(tt.args.key, tt.args.value))
 			assert.Equal(t, tt.wants, config.koanfInstance.String(tt.args.key))
 		})
 	}
@@ -448,32 +485,37 @@ func TestDefaultConfig_DeleteValue(t *testing.T) {
 		})
 	}
 }
-func TestDefaultConfig_writeConfig(t *testing.T) {
+func TestDefaultConfig_WriteConfig(t *testing.T) {
 	type fields struct {
-		configPath       string
 		fullFileLocation string
-		key              string
-		value            string
+		configPath       string
+	}
+	type args struct {
+		key   string
+		value string
 	}
 	tests := []struct {
 		fields    fields
+		args      args
 		name      string
 		wantError bool
 	}{
 		{
 			name: "Write valid config",
 			fields: fields{
-				configPath:       "/tmp/hawkv6",
+				configPath:       "/tmp/hawkv6/",
 				fullFileLocation: "/tmp/hawkv6/config.yaml",
-				key:              "test",
-				value:            "test",
+			},
+			args: args{
+				key:   "test",
+				value: "test",
 			},
 			wantError: false,
 		},
 		{
 			name: "Test init invalid config",
 			fields: fields{
-				fullFileLocation: "/nofileexists",
+				fullFileLocation: "/root/.profile",
 			},
 			wantError: true,
 		},
@@ -486,16 +528,57 @@ func TestDefaultConfig_writeConfig(t *testing.T) {
 				configPath:       tt.fields.configPath,
 				fullFileLocation: tt.fields.fullFileLocation,
 			}
-			if tt.wantError {
-				assert.Error(t, config.InitConfig())
-			} else {
+			if !tt.wantError {
 				assert.NoError(t, config.InitConfig())
-				assert.NoError(t, config.koanfInstance.Set(tt.fields.key, tt.fields.value))
+				assert.NoError(t, config.koanfInstance.Set(tt.args.key, tt.args.value))
 				assert.NoError(t, config.WriteConfig())
+				config.koanfInstance = koanf.New(".")
+				assert.Equal(t, "", config.koanfInstance.String(tt.args.key))
 				assert.NoError(t, config.readConfig())
-				assert.Equal(t, tt.fields.value, config.koanfInstance.String(tt.fields.key))
+				assert.Equal(t, tt.args.key, config.koanfInstance.String(tt.args.key))
 				assert.NoError(t, os.RemoveAll(tt.fields.configPath))
+			} else {
+				assert.Error(t, config.WriteConfig())
 			}
+		})
+	}
+}
+
+func TestDefaultConfig_createDefaultConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		wantError bool
+		want      *DefaultConfig
+	}{
+		{
+			name:      "Create Valid config",
+			wantError: false,
+			want: &DefaultConfig{
+				userHome:         "/tmp/hawkv6",
+				fileName:         "config.yaml",
+				configPath:       "/tmp/hawkv6/.clab-telemetry-linker",
+				fullFileLocation: "/tmp/hawkv6/.clab-telemetry-linker/config.yaml",
+				clabNameKey:      "clab-name",
+				clabName:         "clab-hawkv6",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			helper := helpers.NewMockHelper(ctrl)
+			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey)
+			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
+			helper.EXPECT().GetUserHome().Return(nil, "/tmp/hawkv6")
+			err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+			assert.NoError(t, err)
+			assert.NotNil(t, defaultConfig)
+			assert.Equal(t, tt.want.userHome, defaultConfig.userHome)
+			assert.Equal(t, tt.want.fileName, defaultConfig.fileName)
+			assert.Equal(t, tt.want.configPath, defaultConfig.configPath)
+			assert.Equal(t, tt.want.fullFileLocation, defaultConfig.fullFileLocation)
+			assert.Equal(t, tt.want.clabNameKey, defaultConfig.clabNameKey)
+			assert.Equal(t, tt.want.clabName, defaultConfig.clabName)
 		})
 	}
 }

@@ -126,11 +126,12 @@ func (config *DefaultConfig) DeleteValue(key string) {
 	config.koanfInstance.Delete(key)
 }
 
-func (config *DefaultConfig) SetValue(key string, value interface{}) {
+func (config *DefaultConfig) SetValue(key string, value interface{}) error {
 	config.log.Debugln("Set value in config: ", key, value)
 	if err := config.koanfInstance.Set(key, value); err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	return nil
 }
 
 func (config *DefaultConfig) GetValue(key string) string {
@@ -152,12 +153,12 @@ func (config *DefaultConfig) WriteConfig() error {
 	return nil
 }
 
-func createDefaultConfig(configFileName, clabName, clabNameKey string) (error, *DefaultConfig) {
-	helper := helpers.NewDefaultHelper()
+func CreateDefaultConfig(configFileName, clabName, clabNameKey string, helper helpers.Helper) (error, *DefaultConfig) {
 	defaultConfig := &DefaultConfig{
 		log:           logging.DefaultLogger.WithField("subsystem", Subsystem),
 		koanfInstance: koanf.New("."),
 		clabNameKey:   helper.GetDefaultClabNameKey(),
+		helper:        helper,
 	}
 	if err := defaultConfig.setUserHome(); err != nil {
 		return err, nil
@@ -175,7 +176,7 @@ func createDefaultConfig(configFileName, clabName, clabNameKey string) (error, *
 }
 
 func NewDefaultConfig() *DefaultConfig {
-	err, defaultConfig := createDefaultConfig("", "", "")
+	err, defaultConfig := CreateDefaultConfig("", "", "", helpers.NewDefaultHelper())
 	if err != nil {
 		log.Fatalln(err)
 	}
