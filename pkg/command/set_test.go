@@ -2,7 +2,6 @@ package command
 
 import (
 	"os/exec"
-	"reflect"
 	"testing"
 
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
@@ -37,9 +36,7 @@ func TestNewBasicCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBasicCommand(tt.args.node, tt.args.interface_, tt.args.clabName); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewBasicCommand() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, NewBasicCommand(tt.args.node, tt.args.interface_, tt.args.clabName))
 		})
 	}
 }

@@ -27,12 +27,12 @@ type DefaultImpairmentsManager struct {
 	impairmentsPrefix string
 }
 
-func NewDefaultImpairmentsManager(config config.Config, node, interface_ string) *DefaultImpairmentsManager {
+func NewDefaultImpairmentsManager(config config.Config, node, interface_ string, helper helpers.Helper) *DefaultImpairmentsManager {
 	defaultImpairmentsManager := &DefaultImpairmentsManager{
 		log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
 		config:            config,
-		impairmentsPrefix: helpers.SetDefaultImpairmentsPrefix(node, interface_),
-		command:           command.NewBasicCommand(node, interface_, config.GetValue(helpers.GetDefaultClabNameKey())),
+		impairmentsPrefix: helper.SetDefaultImpairmentsPrefix(node, interface_),
+		command:           command.NewBasicCommand(node, interface_, config.GetValue(helper.GetDefaultClabNameKey())),
 	}
 	return defaultImpairmentsManager
 }

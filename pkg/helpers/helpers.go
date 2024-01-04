@@ -6,11 +6,25 @@ import (
 	"os/user"
 )
 
-func IsRoot() bool {
+type Helper interface {
+	IsRoot() bool
+	GetUserHome() (error, string)
+	GetDefaultClabNameKey() string
+	GetDefaultClabName() string
+	SetDefaultImpairmentsPrefix(node, interface_ string) string
+}
+
+type DefaultHelper struct{}
+
+func NewDefaultHelper() *DefaultHelper {
+	return &DefaultHelper{}
+}
+
+func (helper *DefaultHelper) IsRoot() bool {
 	return os.Geteuid() == 0
 }
 
-func GetUserHome() (error, string) {
+func (helper *DefaultHelper) GetUserHome() (error, string) {
 	username := os.Getenv("SUDO_USER")
 	user, err := user.Lookup(username)
 	if err != nil {
@@ -19,14 +33,14 @@ func GetUserHome() (error, string) {
 	return nil, user.HomeDir
 }
 
-func GetDefaultClabNameKey() string {
+func (helper *DefaultHelper) GetDefaultClabNameKey() string {
 	return "clab-name"
 }
 
-func GetDefaultClabName() string {
+func (helper *DefaultHelper) GetDefaultClabName() string {
 	return "clab-hawkv6"
 }
 
-func SetDefaultImpairmentsPrefix(node, interface_ string) string {
+func (helper *DefaultHelper) SetDefaultImpairmentsPrefix(node, interface_ string) string {
 	return "nodes." + node + ".config." + interface_ + ".impairments."
 }

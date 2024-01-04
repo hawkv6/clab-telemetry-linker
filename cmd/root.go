@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
 	More information: https://containerlab.dev/cmd/tools/netem/set/
 	`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if !helpers.IsRoot() {
+		if !helpers.NewDefaultHelper().IsRoot() {
 			log.Fatalln("You must be root to run this command")
 		}
 	},

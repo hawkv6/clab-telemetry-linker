@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -24,14 +25,16 @@ type DefaultConfig struct {
 	fullFileLocation string
 	clabName         string
 	clabNameKey      string
+	helper           helpers.Helper
 }
 
-func (config *DefaultConfig) setUserHome() {
-	if err, userHome := helpers.GetUserHome(); err != nil {
-		config.log.Fatalln(err)
+func (config *DefaultConfig) setUserHome() error {
+	if err, userHome := config.helper.GetUserHome(); err != nil {
+		return err
 	} else {
 		config.userHome = userHome
 	}
+	return nil
 }
 
 func (config *DefaultConfig) setConfigFileName(configName string) {
@@ -45,12 +48,20 @@ func (config *DefaultConfig) setConfigFileName(configName string) {
 	}
 }
 
-func (config *DefaultConfig) setClabName(clabName string) {
+func (config *DefaultConfig) setConfigPath() {
+	config.configPath = config.userHome + "/.clab-telemetry-linker"
+}
+func (config *DefaultConfig) setConfigFileLocation() {
+	config.fullFileLocation = config.configPath + "/" + config.fileName
+}
+
+func (config *DefaultConfig) setClabName(clabName string) error {
 	name := config.koanfInstance.String(config.clabNameKey)
 	if name == "" {
 		config.log.Debugln("No clab name found in config, set to default: clab-hawkv6")
+		config.clabName = config.helper.GetDefaultClabName()
 		if err := config.koanfInstance.Set(config.clabNameKey, config.clabName); err != nil {
-			log.Fatalln(err)
+			return err
 		}
 	} else if name != clabName {
 		config.log.Debugf("Clab name in config is different from the one provided as flag, use the one from the config: %s", name)
@@ -59,63 +70,71 @@ func (config *DefaultConfig) setClabName(clabName string) {
 		config.log.Debugf("Clab name in config and flag identical: %s", name)
 		config.clabName = clabName
 	}
+	return nil
 }
 
-func (config *DefaultConfig) setConfigPath() {
-	config.configPath = config.userHome + "/.clab-telemetry-linker"
-}
-func (config *DefaultConfig) setConfigFileLocation() {
-	config.fullFileLocation = config.configPath + "/" + config.fileName
-}
-
-func (config *DefaultConfig) doesConfigExist() bool {
+func (config *DefaultConfig) doesConfigExist() (error, bool) {
 	config.log.Debugln("Check if config file exists:", config.fullFileLocation)
 	if _, err := os.Stat(config.fullFileLocation); err != nil {
 		if os.IsNotExist(err) {
-			return false
+			return nil, false
 		}
-		config.log.Fatalf("Unable to check if config file exists: %v", err)
+		return fmt.Errorf("Unable to check if config file exists: %v", err), false
 	}
-	return true
+	return nil, true
 }
 
-func (config *DefaultConfig) createConfig() {
+func (config *DefaultConfig) createConfig() error {
 	config.log.Debugln("Config file not found - creating a new one")
 	if err := os.MkdirAll(config.configPath, 0755); err != nil {
-		config.log.Fatalln(err)
+		return err
 	}
 	configFile, err := os.Create(config.fullFileLocation)
 	if err != nil {
-		config.log.Fatalln(err)
+		return err
 	}
 	defer configFile.Close()
+	return nil
 }
 
-func (config *DefaultConfig) readConfig() {
+func (config *DefaultConfig) readConfig() error {
 	config.log.Debugln("Read config file: ", config.fullFileLocation)
 	if err := config.koanfInstance.Load(file.Provider(config.fullFileLocation), yaml.Parser()); err != nil {
-		config.log.Fatalf("Unable to read config file: %v", err)
+		return err
 	}
+	return nil
 }
 
-func (config *DefaultConfig) InitConfig() {
-	if !config.doesConfigExist() {
-		config.createConfig()
+func (config *DefaultConfig) InitConfig() error {
+	err, exist := config.doesConfigExist()
+	if err != nil {
+		return err
 	}
-	config.readConfig()
+	if !exist {
+		if err := config.createConfig(); err != nil {
+			return err
+		}
+	}
+	if err := config.readConfig(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (config *DefaultConfig) DeleteValue(key string) {
+	config.log.Debugln("Delete value from config: ", key)
 	config.koanfInstance.Delete(key)
 }
 
 func (config *DefaultConfig) SetValue(key string, value interface{}) {
+	config.log.Debugln("Set value in config: ", key, value)
 	if err := config.koanfInstance.Set(key, value); err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func (config *DefaultConfig) GetValue(key string) string {
+	config.log.Debugln("Get value from config: ", key)
 	return config.koanfInstance.String(key)
 }
 
@@ -133,22 +152,32 @@ func (config *DefaultConfig) WriteConfig() error {
 	return nil
 }
 
-func createDefaultConfig(configFileName, clabName, clabNameKey string) *DefaultConfig {
+func createDefaultConfig(configFileName, clabName, clabNameKey string) (error, *DefaultConfig) {
+	helper := helpers.NewDefaultHelper()
 	defaultConfig := &DefaultConfig{
 		log:           logging.DefaultLogger.WithField("subsystem", Subsystem),
 		koanfInstance: koanf.New("."),
-		clabName:      helpers.GetDefaultClabName(),
-		clabNameKey:   helpers.GetDefaultClabNameKey(),
+		clabNameKey:   helper.GetDefaultClabNameKey(),
 	}
-	defaultConfig.setUserHome()
+	if err := defaultConfig.setUserHome(); err != nil {
+		return err, nil
+	}
 	defaultConfig.setConfigFileName(configFileName)
 	defaultConfig.setConfigPath()
 	defaultConfig.setConfigFileLocation()
-	defaultConfig.setClabName(clabName)
-	defaultConfig.InitConfig()
-	return defaultConfig
+	if err := defaultConfig.setClabName(clabName); err != nil {
+		return err, nil
+	}
+	if err := defaultConfig.InitConfig(); err != nil {
+		return err, nil
+	}
+	return nil, defaultConfig
 }
 
 func NewDefaultConfig() *DefaultConfig {
-	return createDefaultConfig("", "", "")
+	err, defaultConfig := createDefaultConfig("", "", "")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return defaultConfig
 }
