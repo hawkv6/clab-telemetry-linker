@@ -37,47 +37,59 @@ func NewDefaultImpairmentsManager(config config.Config, node, interface_ string,
 	return defaultImpairmentsManager
 }
 
-func (manager *DefaultImpairmentsManager) SetDelay(delay uint64) {
+func (manager *DefaultImpairmentsManager) SetDelay(delay uint64) error {
 	if delay == 0 {
 		manager.log.Debugln("Remove delay from config if set")
 		manager.config.DeleteValue(manager.impairmentsPrefix + "delay")
 	} else {
 		manager.log.Debugf("Set delay in config to %d\n", delay)
-		manager.config.SetValue(manager.impairmentsPrefix+"delay", delay)
+		if err := manager.config.SetValue(manager.impairmentsPrefix+"delay", delay); err != nil {
+			return err
+		}
 		manager.command.AddDelay(delay)
 	}
+	return nil
 }
 
-func (manager *DefaultImpairmentsManager) SetJitter(jitter uint64) {
+func (manager *DefaultImpairmentsManager) SetJitter(jitter uint64) error {
 	if jitter == 0 {
 		manager.log.Debugln("Remove jitter from config if set")
 		manager.config.DeleteValue(manager.impairmentsPrefix + "jitter")
 	} else {
 		manager.log.Debugf("Set jitter in config to %d\n", jitter)
-		manager.config.SetValue(manager.impairmentsPrefix+"jitter", jitter)
+		if err := manager.config.SetValue(manager.impairmentsPrefix+"jitter", jitter); err != nil {
+			return err
+		}
 		manager.command.AddJitter(jitter)
 	}
+	return nil
 }
-func (manager *DefaultImpairmentsManager) SetLoss(loss float64) {
+func (manager *DefaultImpairmentsManager) SetLoss(loss float64) error {
 	if loss == 0 {
 		manager.log.Debugln("Remove loss from config if set")
 		manager.config.DeleteValue(manager.impairmentsPrefix + "loss")
 	} else {
 		manager.log.Debugf("Set loss in config to %f\n", loss)
-		manager.config.SetValue(manager.impairmentsPrefix+"loss", loss)
+		if err := manager.config.SetValue(manager.impairmentsPrefix+"loss", loss); err != nil {
+			return err
+		}
 		manager.command.AddLoss(loss)
 	}
+	return nil
 }
 
-func (manager *DefaultImpairmentsManager) SetRate(rate uint64) {
+func (manager *DefaultImpairmentsManager) SetRate(rate uint64) error {
 	if rate == 0 {
 		manager.log.Debugln("Remove rate from config if set")
 		manager.config.DeleteValue(manager.impairmentsPrefix + "rate")
 	} else {
 		manager.log.Debugf("Set rate in config to %d\n", rate)
-		manager.config.SetValue(manager.impairmentsPrefix+"rate", rate)
+		if err := manager.config.SetValue(manager.impairmentsPrefix+"rate", rate); err != nil {
+			return err
+		}
 		manager.command.AddRate(rate)
 	}
+	return nil
 }
 
 func (manager *DefaultImpairmentsManager) ApplyImpairments() error {

@@ -16,29 +16,27 @@ var (
 	Rate      uint64
 )
 
+func handleError(err error, manager *impairments.DefaultImpairmentsManager, message string) {
+	if err != nil {
+		log.Errorf("%s: %v\n", message, err)
+		if err := manager.DeleteImpairments(); err != nil {
+			log.Fatalf("Error reverting impairments: %v\n", err)
+		}
+		log.Fatalf("All settings reverted due to error: %v\n", err)
+	}
+}
+
 var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set impairments on a containerlab interface",
 	Run: func(cmd *cobra.Command, args []string) {
 		manager := impairments.NewDefaultImpairmentsManager(config.NewDefaultConfig(), Node, Interface, helpers.NewDefaultHelper())
-		manager.SetDelay(Delay)
-		manager.SetJitter(Jitter)
-		manager.SetLoss(Loss)
-		manager.SetRate(Rate)
-		if err := manager.ApplyImpairments(); err != nil {
-			log.Error("Error applying impairments")
-			if err := manager.DeleteImpairments(); err != nil {
-				log.Fatalf("Error reverting impairments: %v\n", err)
-			}
-			log.Fatalf("All settings reverted due to error: %v\n", err)
-		}
-
-		if err := manager.WriteConfig(); err != nil {
-			if err := manager.DeleteImpairments(); err != nil {
-				log.Fatalf("Error reverting impairments: %v\n", err)
-			}
-			log.Fatalf("All settings reverted due to error: %v\n", err)
-		}
+		handleError(manager.SetDelay(Delay), manager, "Error setting delay")
+		handleError(manager.SetJitter(Jitter), manager, "Error setting jitter")
+		handleError(manager.SetLoss(Loss), manager, "Error setting loss")
+		handleError(manager.SetRate(Rate), manager, "Error setting rate")
+		handleError(manager.ApplyImpairments(), manager, "Error applying impairments")
+		handleError(manager.WriteConfig(), manager, "Error writing config")
 	},
 }
 
