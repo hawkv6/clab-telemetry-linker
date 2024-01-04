@@ -1,7 +1,7 @@
 package config
 
 type Config interface {
-	InitConfig()
+	InitConfig() error
 	GetValue(string) string
 	DeleteValue(string)
 	SetValue(string, interface{})
