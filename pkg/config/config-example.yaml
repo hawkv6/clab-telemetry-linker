@@ -1,0 +1,19 @@
+---
+  clab-name: clab-hawkv6
+  nodes:
+    XR-1:
+      impairments:
+        GigabitEthernet0-0-0-0:
+          delay: 10
+          jitter: 5
+          loss: 10
+          rate: 100000
+        GigabitEthernet0-0-0-1: 
+          delay: 10
+
+    XR-2:
+      impairments: 
+       GigabitEthernet0-0-0-0:
+          delay: 100
+       GigabitEthernet0-0-0-1:
+          loss: 10
