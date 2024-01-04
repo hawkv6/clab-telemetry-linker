@@ -30,7 +30,11 @@ var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set impairments on a containerlab interface",
 	Run: func(cmd *cobra.Command, args []string) {
-		manager := impairments.NewDefaultImpairmentsManager(config.NewDefaultConfig(), Node, Interface, helpers.NewDefaultHelper())
+		err, defaultConfig := config.NewDefaultConfig()
+		if err != nil {
+			log.Fatalf("Error creating config: %v\n", err)
+		}
+		manager := impairments.NewDefaultImpairmentsManager(defaultConfig, Node, Interface, helpers.NewDefaultHelper())
 		handleError(manager.SetDelay(Delay), manager, "Error setting delay")
 		handleError(manager.SetJitter(Jitter), manager, "Error setting jitter")
 		handleError(manager.SetLoss(Loss), manager, "Error setting loss")

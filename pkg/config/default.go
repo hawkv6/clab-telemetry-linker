@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -175,10 +174,10 @@ func CreateDefaultConfig(configFileName, clabName, clabNameKey string, helper he
 	return nil, defaultConfig
 }
 
-func NewDefaultConfig() *DefaultConfig {
+func NewDefaultConfig() (error, *DefaultConfig) {
 	err, defaultConfig := CreateDefaultConfig("", "", "", helpers.NewDefaultHelper())
 	if err != nil {
-		log.Fatalln(err)
+		return err, nil
 	}
-	return defaultConfig
+	return nil, defaultConfig
 }

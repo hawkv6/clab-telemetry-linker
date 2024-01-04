@@ -562,23 +562,76 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 				clabName:         "clab-hawkv6",
 			},
 		},
+		{
+			name:      "Wrong user home",
+			wantError: true,
+			want: &DefaultConfig{
+				userHome:    "",
+				fileName:    "config.yaml",
+				clabNameKey: "clab-name",
+				clabName:    "clab-hawkv6",
+			},
+		},
+		{
+			name:      "Invalid config",
+			wantError: true,
+			want: &DefaultConfig{
+				userHome:    "/root",
+				fileName:    "config.yaml",
+				clabNameKey: "clab-name",
+				clabName:    "clab-hawkv6",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			helper := helpers.NewMockHelper(ctrl)
 			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey)
-			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
-			helper.EXPECT().GetUserHome().Return(nil, "/tmp/hawkv6")
-			err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
-			assert.NoError(t, err)
-			assert.NotNil(t, defaultConfig)
-			assert.Equal(t, tt.want.userHome, defaultConfig.userHome)
-			assert.Equal(t, tt.want.fileName, defaultConfig.fileName)
-			assert.Equal(t, tt.want.configPath, defaultConfig.configPath)
-			assert.Equal(t, tt.want.fullFileLocation, defaultConfig.fullFileLocation)
-			assert.Equal(t, tt.want.clabNameKey, defaultConfig.clabNameKey)
-			assert.Equal(t, tt.want.clabName, defaultConfig.clabName)
+			if tt.want.userHome == "" {
+				helper.EXPECT().GetUserHome().Return(errors.New("artificial error"), "")
+			} else {
+				helper.EXPECT().GetUserHome().Return(nil, tt.want.userHome)
+			}
+			if tt.wantError {
+				if tt.want.userHome == "/root" {
+					helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
+				}
+				err, _ := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+				assert.Error(t, err)
+			} else {
+				helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName)
+				err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+				assert.NoError(t, err)
+				assert.NotNil(t, defaultConfig)
+				assert.Equal(t, tt.want.userHome, defaultConfig.userHome)
+				assert.Equal(t, tt.want.fileName, defaultConfig.fileName)
+				assert.Equal(t, tt.want.configPath, defaultConfig.configPath)
+				assert.Equal(t, tt.want.fullFileLocation, defaultConfig.fullFileLocation)
+				assert.Equal(t, tt.want.clabNameKey, defaultConfig.clabNameKey)
+				assert.Equal(t, tt.want.clabName, defaultConfig.clabName)
+
+			}
+		})
+	}
+}
+func TestDefaultConfig_NewDefaultConfig(t *testing.T) {
+	tests := []struct {
+		name      string
+		wantError bool
+	}{
+		{
+			name:      "Test NewDefaultConfig",
+			wantError: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err, config := NewDefaultConfig()
+			if tt.wantError {
+				assert.Error(t, err)
+				assert.Nil(t, config)
+			}
 		})
 	}
 }
