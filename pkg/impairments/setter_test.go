@@ -12,7 +12,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestNewDefaultImpairmentsManager(t *testing.T) {
+func TestNewDefaultSetter(t *testing.T) {
 	type args struct {
 		node       string
 		interface_ string
@@ -21,7 +21,7 @@ func TestNewDefaultImpairmentsManager(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *DefaultImpairmentsManager
+		want *DefaultSetter
 	}{
 		{
 			name: "TestNewDefaultImpairmentsManager",
@@ -30,8 +30,10 @@ func TestNewDefaultImpairmentsManager(t *testing.T) {
 				interface_: "Gi0-0-0-0",
 				helper:     helpers.NewDefaultHelper(),
 			},
-			want: &DefaultImpairmentsManager{
-				log: logging.DefaultLogger.WithField("subsystem", Subsystem),
+			want: &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log: logging.DefaultLogger.WithField("subsystem", Subsystem),
+				},
 			},
 		},
 	}
@@ -43,14 +45,14 @@ func TestNewDefaultImpairmentsManager(t *testing.T) {
 			config.EXPECT().GetValue(helper.GetDefaultClabNameKey()).Return("clab-name").AnyTimes()
 			tt.want.config = config
 			tt.want.impairmentsPrefix = helper.SetDefaultImpairmentsPrefix(tt.args.node, tt.args.interface_)
-			tt.want.command = command.NewBasicCommand(tt.args.node, tt.args.interface_, config.GetValue(helper.GetDefaultClabNameKey()))
-			assert.Equal(t, tt.want, NewDefaultImpairmentsManager(config, tt.args.node, tt.args.interface_, tt.args.helper))
+			tt.want.command = command.NewDefaultSetCommand(tt.args.node, tt.args.interface_, config.GetValue(helper.GetDefaultClabNameKey()))
+			assert.Equal(t, tt.want, NewDefaultSetter(config, tt.args.node, tt.args.interface_, tt.args.helper, tt.want.command))
 
 		})
 	}
 }
 
-func TestDefaultImpairmentsManager_SetDelay(t *testing.T) {
+func TestDefaultSetter_SetDelay(t *testing.T) {
 	type args struct {
 		delay uint64
 	}
@@ -85,9 +87,11 @@ func TestDefaultImpairmentsManager_SetDelay(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -108,7 +112,7 @@ func TestDefaultImpairmentsManager_SetDelay(t *testing.T) {
 	}
 }
 
-func TestDefaultImpairmentsManager_SetJitter(t *testing.T) {
+func TestDefaultSetter_SetJitter(t *testing.T) {
 	type args struct {
 		jitter uint64
 	}
@@ -143,9 +147,11 @@ func TestDefaultImpairmentsManager_SetJitter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -166,7 +172,7 @@ func TestDefaultImpairmentsManager_SetJitter(t *testing.T) {
 	}
 }
 
-func TestDefaultImpairmentsManager_SetLoss(t *testing.T) {
+func TestDefaultSetter_SetLoss(t *testing.T) {
 	type args struct {
 		loss float64
 	}
@@ -201,9 +207,11 @@ func TestDefaultImpairmentsManager_SetLoss(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -224,7 +232,7 @@ func TestDefaultImpairmentsManager_SetLoss(t *testing.T) {
 	}
 }
 
-func TestDefaultImpairmentsManager_SetRate(t *testing.T) {
+func TestDefaultSetter_SetRate(t *testing.T) {
 	type args struct {
 		rate uint64
 	}
@@ -259,9 +267,11 @@ func TestDefaultImpairmentsManager_SetRate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -282,7 +292,7 @@ func TestDefaultImpairmentsManager_SetRate(t *testing.T) {
 	}
 }
 
-func TestDefaultImpairmentsmanager_ApplyImpairments(t *testing.T) {
+func TestDefaultSetter_ApplyImpairments(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
@@ -300,9 +310,11 @@ func TestDefaultImpairmentsmanager_ApplyImpairments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -318,7 +330,7 @@ func TestDefaultImpairmentsmanager_ApplyImpairments(t *testing.T) {
 
 }
 
-func TestDefaultImpairmentsManager_DeleteImpairments(t *testing.T) {
+func TestDefaultSetter_DeleteImpairments(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
@@ -336,9 +348,11 @@ func TestDefaultImpairmentsManager_DeleteImpairments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}
@@ -353,7 +367,7 @@ func TestDefaultImpairmentsManager_DeleteImpairments(t *testing.T) {
 	}
 }
 
-func TestDefaultImpairmentsManager_WriteConfig(t *testing.T) {
+func TestDefaultSetter_WriteConfig(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
@@ -371,9 +385,11 @@ func TestDefaultImpairmentsManager_WriteConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockConfig := config.NewMockConfig(gomock.NewController(t))
 			mockCommand := command.NewMockSetCommand(gomock.NewController(t))
-			manager := &DefaultImpairmentsManager{
-				log:               logging.DefaultLogger.WithField("subsystem", Subsystem),
-				config:            mockConfig,
+			manager := &DefaultSetter{
+				ImpairmentsManager: ImpairmentsManager{
+					log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
+					config: mockConfig,
+				},
 				command:           mockCommand,
 				impairmentsPrefix: "nodes.XR-1.config.Gi0-0-0-0.impairments.",
 			}

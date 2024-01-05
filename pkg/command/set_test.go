@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBasicCommand(t *testing.T) {
+func TestNewDefaultSetCommand(t *testing.T) {
 	type args struct {
 		node       string
 		interface_ string
@@ -28,15 +28,17 @@ func TestNewBasicCommand(t *testing.T) {
 				clabName:   "clab-hawkv6",
 			},
 			want: &DefaultSetCommand{
-				log:          logging.DefaultLogger.WithField("subsystem", "command"),
-				basicCommand: exec.Command("containerlab", "tools", "netem", "set", "-n", "clab-hawkv6-XR-1", "-i", "Gi0-0-0-0"),
-				fullCommand:  exec.Command("containerlab", "tools", "netem", "set", "-n", "clab-hawkv6-XR-1", "-i", "Gi0-0-0-0"),
+				BaseCommand: BaseCommand{
+					log:         logging.DefaultLogger.WithField("subsystem", "command"),
+					execCommand: exec.Command("containerlab", "tools", "netem", "set", "-n", "clab-hawkv6-XR-1", "-i", "Gi0-0-0-0"),
+				},
+				resetCommand: exec.Command("containerlab", "tools", "netem", "set", "-n", "clab-hawkv6-XR-1", "-i", "Gi0-0-0-0"),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, NewBasicCommand(tt.args.node, tt.args.interface_, tt.args.clabName))
+			assert.Equal(t, tt.want, NewDefaultSetCommand(tt.args.node, tt.args.interface_, tt.args.clabName))
 		})
 	}
 }
@@ -71,11 +73,13 @@ func TestDefaultSetCommand_AddDelay(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			command := &DefaultSetCommand{
-				log:         tt.fields.log,
-				fullCommand: tt.fields.fullCommand,
+				BaseCommand: BaseCommand{
+					log:         tt.fields.log,
+					execCommand: tt.fields.fullCommand,
+				},
 			}
 			command.AddDelay(tt.args.delay)
-			assert.Equal(t, command.fullCommand, tt.want)
+			assert.Equal(t, command.execCommand, tt.want)
 		})
 	}
 }
@@ -110,11 +114,13 @@ func TestDefaultSetCommand_AddJitter(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			command := &DefaultSetCommand{
-				log:         tt.fields.log,
-				fullCommand: tt.fields.fullCommand,
+				BaseCommand: BaseCommand{
+					log:         tt.fields.log,
+					execCommand: tt.fields.fullCommand,
+				},
 			}
 			command.AddJitter(tt.args.jitter)
-			assert.Equal(t, command.fullCommand, tt.want)
+			assert.Equal(t, command.execCommand, tt.want)
 		})
 	}
 }
@@ -149,11 +155,13 @@ func TestDefaultSetCommand_AddLoss(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			command := &DefaultSetCommand{
-				log:         tt.fields.log,
-				fullCommand: tt.fields.fullCommand,
+				BaseCommand: BaseCommand{
+					log:         tt.fields.log,
+					execCommand: tt.fields.fullCommand,
+				},
 			}
 			command.AddLoss(tt.args.loss)
-			assert.Equal(t, command.fullCommand, tt.want)
+			assert.Equal(t, command.execCommand, tt.want)
 		})
 	}
 }
@@ -188,11 +196,13 @@ func TestDefaultSetCommand_AddRate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			command := &DefaultSetCommand{
-				log:         tt.fields.log,
-				fullCommand: tt.fields.fullCommand,
+				BaseCommand: BaseCommand{
+					log:         tt.fields.log,
+					execCommand: tt.fields.fullCommand,
+				},
 			}
 			command.AddRate(tt.args.rate)
-			assert.Equal(t, command.fullCommand, tt.want)
+			assert.Equal(t, command.execCommand, tt.want)
 		})
 	}
 }
@@ -233,12 +243,14 @@ func TestDefaultSetCommand_executeCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			command := &DefaultSetCommand{
-				log: tt.fields.log,
+				BaseCommand: BaseCommand{
+					log: tt.fields.log,
+				},
 			}
 			if tt.wantError {
-				assert.Error(t, command.executeCommand(tt.args.cmd), "exit status 1")
+				assert.Error(t, command.ExecuteCommand(tt.args.cmd), "exit status 1")
 			} else {
-				assert.NoError(t, command.executeCommand(tt.args.cmd))
+				assert.NoError(t, command.ExecuteCommand(tt.args.cmd))
 			}
 		})
 	}

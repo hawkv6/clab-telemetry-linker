@@ -1,22 +1,14 @@
 package cmd
 
 import (
+	"github.com/hawkv6/clab-telemetry-linker/pkg/command"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/helpers"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/impairments"
 	"github.com/spf13/cobra"
 )
 
-var (
-	Node      string
-	Interface string
-	Delay     uint64
-	Jitter    uint64
-	Loss      float64
-	Rate      uint64
-)
-
-func handleError(err error, manager *impairments.DefaultImpairmentsManager, message string) {
+func handleError(err error, manager *impairments.DefaultSetter, message string) {
 	if err != nil {
 		log.Errorf("%s: %v\n", message, err)
 		if err := manager.DeleteImpairments(); err != nil {
@@ -34,7 +26,9 @@ var setCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error creating config: %v\n", err)
 		}
-		manager := impairments.NewDefaultImpairmentsManager(defaultConfig, Node, Interface, helpers.NewDefaultHelper())
+		helper := helpers.NewDefaultHelper()
+		command := command.NewDefaultSetCommand(Node, Interface, defaultConfig.GetValue(helper.GetDefaultClabNameKey()))
+		manager := impairments.NewDefaultSetter(defaultConfig, Node, Interface, helper, command)
 		handleError(manager.SetDelay(Delay), manager, "Error setting delay")
 		handleError(manager.SetJitter(Jitter), manager, "Error setting jitter")
 		handleError(manager.SetLoss(Loss), manager, "Error setting loss")
@@ -42,14 +36,6 @@ var setCmd = &cobra.Command{
 		handleError(manager.ApplyImpairments(), manager, "Error applying impairments")
 		handleError(manager.WriteConfig(), manager, "Error writing config")
 	},
-}
-
-func markRequiredFlags(flags []string) {
-	for _, flag := range flags {
-		if err := setCmd.MarkFlagRequired(flag); err != nil {
-			log.Fatal(err)
-		}
-	}
 }
 
 func init() {
@@ -61,5 +47,5 @@ func init() {
 	setCmd.Flags().Float64VarP(&Loss, "loss", "l", 0, "packet loss in %")
 	setCmd.Flags().Uint64VarP(&Rate, "rate", "r", 0, "link rate / bandwidth in kbit/s")
 
-	markRequiredFlags([]string{"node", "interface"})
+	markRequiredFlags(setCmd, []string{"node", "interface"})
 }

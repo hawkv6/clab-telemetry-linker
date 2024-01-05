@@ -7,7 +7,23 @@ import (
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
 )
 
-var log = logging.DefaultLogger.WithField("subsystem", "cmd")
+var (
+	log       = logging.DefaultLogger.WithField("subsystem", "cmd")
+	Node      string
+	Interface string
+	Delay     uint64
+	Jitter    uint64
+	Loss      float64
+	Rate      uint64
+)
+
+func markRequiredFlags(cmd *cobra.Command, flags []string) {
+	for _, flag := range flags {
+		if err := cmd.MarkFlagRequired(flag); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "clab-telemetry-linker",
