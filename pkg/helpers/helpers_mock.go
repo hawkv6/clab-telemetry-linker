@@ -66,6 +66,20 @@ func (mr *MockHelperMockRecorder) GetDefaultClabNameKey() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultClabNameKey", reflect.TypeOf((*MockHelper)(nil).GetDefaultClabNameKey))
 }
 
+// GetDefaultImpairmentsPrefix mocks base method.
+func (m *MockHelper) GetDefaultImpairmentsPrefix(node, interface_ string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDefaultImpairmentsPrefix", node, interface_)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetDefaultImpairmentsPrefix indicates an expected call of GetDefaultImpairmentsPrefix.
+func (mr *MockHelperMockRecorder) GetDefaultImpairmentsPrefix(node, interface_ any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultImpairmentsPrefix", reflect.TypeOf((*MockHelper)(nil).GetDefaultImpairmentsPrefix), node, interface_)
+}
+
 // GetUserHome mocks base method.
 func (m *MockHelper) GetUserHome() (error, string) {
 	m.ctrl.T.Helper()
@@ -93,18 +107,4 @@ func (m *MockHelper) IsRoot() bool {
 func (mr *MockHelperMockRecorder) IsRoot() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsRoot", reflect.TypeOf((*MockHelper)(nil).IsRoot))
-}
-
-// SetDefaultImpairmentsPrefix mocks base method.
-func (m *MockHelper) SetDefaultImpairmentsPrefix(node, interface_ string) string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDefaultImpairmentsPrefix", node, interface_)
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// SetDefaultImpairmentsPrefix indicates an expected call of SetDefaultImpairmentsPrefix.
-func (mr *MockHelperMockRecorder) SetDefaultImpairmentsPrefix(node, interface_ any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDefaultImpairmentsPrefix", reflect.TypeOf((*MockHelper)(nil).SetDefaultImpairmentsPrefix), node, interface_)
 }

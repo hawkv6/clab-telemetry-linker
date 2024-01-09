@@ -21,7 +21,7 @@ type KafkaConsumer struct {
 	log                     *logrus.Entry
 	kafkaBroker             string
 	kafkaTopic              string
-	msgChan                 chan Message
+	unprocessedMsgChan      chan Message
 	saramaConfig            *sarama.Config
 	saramaConsumer          sarama.Consumer
 	saramaPartitionConsumer sarama.PartitionConsumer
@@ -29,11 +29,11 @@ type KafkaConsumer struct {
 
 func NewKafkaConsumer(kafkaBroker, kafkaTopic string, msgChan chan Message) *KafkaConsumer {
 	return &KafkaConsumer{
-		log:          logging.DefaultLogger.WithField("subsystem", subsystem),
-		kafkaBroker:  kafkaBroker,
-		kafkaTopic:   kafkaTopic,
-		msgChan:      msgChan,
-		saramaConfig: sarama.NewConfig(),
+		log:                logging.DefaultLogger.WithField("subsystem", subsystem),
+		kafkaBroker:        kafkaBroker,
+		kafkaTopic:         kafkaTopic,
+		unprocessedMsgChan: msgChan,
+		saramaConfig:       sarama.NewConfig(),
 	}
 }
 
@@ -75,7 +75,6 @@ func (consumer *KafkaConsumer) UnmarshalTelemetryMessage(message *sarama.Consume
 		consumer.log.Debugln("Error unmarshalling message: ", err)
 		return err, nil
 	}
-	consumer.log.Debugf("Telemetry message: %v", telemetryMessage)
 	return nil, &telemetryMessage
 }
 
@@ -95,7 +94,6 @@ func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryM
 		}
 		*field = value
 	}
-	consumer.log.Debugf("Received Delay message: %v", delayMessage)
 	return nil, &delayMessage
 }
 
@@ -106,9 +104,7 @@ func (consumer *KafkaConsumer) UnmarshalIsisMessage(telemetryMessage TelemetryMe
 	case telemetryMessage.Fields["interface_status_and_data/enabled/bandwidth"] != nil:
 		return consumer.UnmarshalBandwidthMessage(telemetryMessage)
 	default:
-		msg := fmt.Sprintf("Received unknown ISIS message: %v", telemetryMessage)
-		consumer.log.Debugln(msg)
-		return fmt.Errorf(msg), nil
+		return fmt.Errorf("Received unknown ISIS message: %v", telemetryMessage), nil
 	}
 }
 
@@ -119,7 +115,6 @@ func (consumer *KafkaConsumer) UnmarshalLossMessage(telemetryMessage TelemetryMe
 		return fmt.Errorf("unable to convert packet_loss_percentage to float"), nil
 	}
 	lossMessage.LossPercentage = value
-	consumer.log.Debugf("Received Loss message: %v", lossMessage)
 	return nil, &lossMessage
 }
 
@@ -130,7 +125,6 @@ func (consumer *KafkaConsumer) UnmarshalBandwidthMessage(telemetryMessage Teleme
 		return fmt.Errorf("unable to convert bandwidth to float64"), nil
 	}
 	bandwidthMessage.Bandwidth = value
-	consumer.log.Debugf("Received Bandwidth message: %v", bandwidthMessage)
 	return nil, &bandwidthMessage
 }
 
@@ -144,14 +138,13 @@ func (consumer *KafkaConsumer) processMessage(message *sarama.ConsumerMessage) {
 		if err != nil {
 			return
 		}
-		consumer.msgChan <- delayMessage
+		consumer.unprocessedMsgChan <- delayMessage
 	} else if telemetryMessage.Name == "isis" {
 		err, isisMessage := consumer.UnmarshalIsisMessage(*telemetryMessage)
 		if err != nil {
 			return
 		}
-		consumer.log.Infof("Received ISIS message: %v", isisMessage)
-		consumer.msgChan <- isisMessage
+		consumer.unprocessedMsgChan <- isisMessage
 	} else {
 		consumer.log.Debugf("Skipping unknown message: %v", telemetryMessage)
 		return

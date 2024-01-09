@@ -1,6 +1,9 @@
 package publisher
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/hawkv6/clab-telemetry-linker/pkg/consumer"
+	"github.com/sirupsen/logrus"
+)
 
 var subsystem = "publisher"
 
@@ -9,16 +12,22 @@ type Publisher interface {
 }
 
 type DefaultPublisher struct {
-	log *logrus.Entry
+	log              *logrus.Entry
+	processedMsgChan chan consumer.Message
 }
 
-func NewDefaultPublisher() *DefaultPublisher {
+func NewDefaultPublisher(msgChan chan consumer.Message) *DefaultPublisher {
 	return &DefaultPublisher{
-		log: logrus.WithField("subsystem", subsystem),
+		log:              logrus.WithField("subsystem", subsystem),
+		processedMsgChan: msgChan,
 	}
 }
 
 func (publisher *DefaultPublisher) Start() error {
-	publisher.log.Infoln("Start Publisher")
-	return nil
+	for {
+		msg := <-publisher.processedMsgChan
+		publisher.log.Infof("Received message: %v", msg)
+	}
+	// publisher.log.Infoln("Start Publisher")
+	// return nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/consumer"
+	"github.com/hawkv6/clab-telemetry-linker/pkg/helpers"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/processor"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/publisher"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/service"
@@ -26,23 +27,24 @@ var startCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error creating config: %v\n", err)
 		}
-		msgChan := make(chan consumer.Message)
-		consumer := consumer.NewKafkaConsumer(KafkaBroker, ReceiverTopic, msgChan)
+		unprocessedMsgChan := make(chan consumer.Message)
+		processedMsgChan := make(chan consumer.Message)
+		consumer := consumer.NewKafkaConsumer(KafkaBroker, ReceiverTopic, unprocessedMsgChan)
 		if err := consumer.Init(); err != nil {
 			log.Fatalf("Error initializing receiver: %v\n", err)
 		}
 
-		processor := processor.NewDefaultProcessor(msgChan)
-		publisher := publisher.NewDefaultPublisher()
+		processor := processor.NewDefaultProcessor(defaultConfig, unprocessedMsgChan, processedMsgChan, helpers.NewDefaultHelper())
+		publisher := publisher.NewDefaultPublisher(processedMsgChan)
 
 		defaultService := service.NewDefaultService(defaultConfig, consumer, processor, publisher)
 		if err := defaultService.Start(); err != nil {
 			log.Fatalf("Error starting service: %v\n", err)
 		}
-		signalChannel := make(chan os.Signal, 1)
-		signal.Notify(signalChannel, os.Interrupt)
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, os.Interrupt)
 
-		<-signalChannel
+		<-signalChan
 		log.Info("Received interrupt signal, shutting down")
 		if err := defaultService.Stop(); err != nil {
 			log.Fatalf("Error stopping service: %v\n", err)

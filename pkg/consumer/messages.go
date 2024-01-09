@@ -37,4 +37,8 @@ type BandwidthMessage struct {
 	Bandwidth float64 `json:"interface_status_and_data/enabled/bandwidth,omitempty"`
 }
 
-func (TelemetryMessage) isMessage() {}
+// func (TelemetryMessage) isMessage() {}
+
+func (DelayMessage) isMessage()     {}
+func (LossMessage) isMessage()      {}
+func (BandwidthMessage) isMessage() {}

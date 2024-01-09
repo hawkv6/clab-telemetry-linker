@@ -134,8 +134,13 @@ func (config *DefaultConfig) SetValue(key string, value interface{}) error {
 }
 
 func (config *DefaultConfig) GetValue(key string) string {
-	config.log.Debugln("Get value from config: ", key)
-	return config.koanfInstance.String(key)
+	value := config.koanfInstance.String(key)
+	if value == "" {
+		config.log.Debugf("No value found in config for key: %s", key)
+	} else {
+		config.log.Debugf("value from config: %s = %s", key, value)
+	}
+	return value
 }
 
 func (config *DefaultConfig) WriteConfig() error {

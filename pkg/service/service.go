@@ -41,11 +41,14 @@ func NewDefaultService(config config.Config, receiver consumer.Consumer, process
 func (service *DefaultService) Start() error {
 	go service.consumer.Start()
 	go service.processor.Start()
+	go service.publisher.Start()
 	service.log.Infoln("Start Service")
 	return nil
 }
 func (service *DefaultService) Stop() error {
-	service.consumer.Stop()
+	if err := service.consumer.Stop(); err != nil {
+		return err
+	}
 	service.log.Infoln("Stop Service")
 	return nil
 }

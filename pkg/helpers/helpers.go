@@ -11,7 +11,7 @@ type Helper interface {
 	GetUserHome() (error, string)
 	GetDefaultClabNameKey() string
 	GetDefaultClabName() string
-	SetDefaultImpairmentsPrefix(node, interface_ string) string
+	GetDefaultImpairmentsPrefix(node, interface_ string) string
 }
 
 type DefaultHelper struct{}
@@ -41,6 +41,6 @@ func (helper *DefaultHelper) GetDefaultClabName() string {
 	return "clab-hawkv6"
 }
 
-func (helper *DefaultHelper) SetDefaultImpairmentsPrefix(node, interface_ string) string {
+func (helper *DefaultHelper) GetDefaultImpairmentsPrefix(node, interface_ string) string {
 	return "nodes." + node + ".config." + interface_ + ".impairments."
 }

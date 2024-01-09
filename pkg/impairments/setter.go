@@ -29,7 +29,7 @@ func NewDefaultSetter(config config.Config, node, interface_ string, helper help
 			log:    logging.DefaultLogger.WithField("subsystem", Subsystem),
 			config: config,
 		},
-		impairmentsPrefix: helper.SetDefaultImpairmentsPrefix(node, interface_),
+		impairmentsPrefix: helper.GetDefaultImpairmentsPrefix(node, interface_),
 		command:           command,
 	}
 	return defaultSetter
