@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "interface_status_and_data/enabled/packet_loss_percentage": 0
+    },
+    "name": "isis",
+    "tags": {
+        "host": "telegraf",
+        "instance_name": "1",
+        "interface_name": "GigabitEthernet0/0/0/0",
+        "path": "Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface",
+        "source": "XR-1",
+        "subscription": "hawk-metrics"
+    },
+    "timestamp": 1704728296
+}

@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var subsystem = "command"
+
 type Command interface {
 	ExecuteCommand(*exec.Cmd) error
 }
