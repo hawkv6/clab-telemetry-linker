@@ -654,7 +654,6 @@ func TestDefaultConfig_WatchConfigChange(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			// helper := helpers.NewDefaultHelper()
 			helper := helpers.NewMockHelper(ctrl)
 			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey).AnyTimes()
 			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName).AnyTimes()

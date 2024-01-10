@@ -36,7 +36,7 @@ var startCmd = &cobra.Command{
 		if err := consumer.Init(); err != nil {
 			log.Fatalf("Error initializing receiver: %v\n", err)
 		}
-		publisher := publisher.NewDefaultPublisher(KafkaBroker, PublisherTopic, processedMsgChan)
+		publisher := publisher.NewKafkaPublisher(KafkaBroker, PublisherTopic, processedMsgChan)
 		if err := publisher.Init(); err != nil {
 			log.Fatalf("Error initializing publisher: %v\n", err)
 		}
