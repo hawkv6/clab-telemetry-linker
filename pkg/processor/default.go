@@ -110,7 +110,7 @@ func (processor *DefaultProcessor) Start() {
 		case msg := <-processor.unprocessedMsgChan:
 			processor.processMessage(msg)
 		case <-processor.quitChan:
-			processor.log.Debug("Stopping processor")
+			processor.log.Infoln("Stopping processor")
 			return
 		}
 	}

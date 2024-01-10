@@ -153,7 +153,6 @@ func (consumer *KafkaConsumer) processMessage(message *sarama.ConsumerMessage) {
 
 func (consumer *KafkaConsumer) Start() {
 	consumer.log.Infof("Start consuming messages from broker %s and topic %s", consumer.kafkaBroker, consumer.kafkaTopic)
-	defer consumer.saramaPartitionConsumer.Close()
 	for {
 		select {
 		case message := <-consumer.saramaPartitionConsumer.Messages():
