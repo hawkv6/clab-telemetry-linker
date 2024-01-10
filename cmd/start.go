@@ -43,9 +43,7 @@ var startCmd = &cobra.Command{
 		processor := processor.NewDefaultProcessor(defaultConfig, unprocessedMsgChan, processedMsgChan, helpers.NewDefaultHelper())
 
 		defaultService := service.NewDefaultService(defaultConfig, consumer, processor, publisher)
-		if err := defaultService.Start(); err != nil {
-			log.Fatalf("Error starting service: %v\n", err)
-		}
+		defaultService.Start()
 		signalChan := make(chan os.Signal, 1)
 		signal.Notify(signalChan, os.Interrupt)
 
