@@ -3,6 +3,7 @@ package consumer
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
@@ -22,6 +23,7 @@ type KafkaConsumer struct {
 	kafkaBroker             string
 	kafkaTopic              string
 	unprocessedMsgChan      chan Message
+	quitChan                chan bool
 	saramaConfig            *sarama.Config
 	saramaConsumer          sarama.Consumer
 	saramaPartitionConsumer sarama.PartitionConsumer
@@ -33,11 +35,17 @@ func NewKafkaConsumer(kafkaBroker, kafkaTopic string, msgChan chan Message) *Kaf
 		kafkaBroker:        kafkaBroker,
 		kafkaTopic:         kafkaTopic,
 		unprocessedMsgChan: msgChan,
-		saramaConfig:       sarama.NewConfig(),
+		quitChan:           make(chan bool),
 	}
 }
 
+func (consumer *KafkaConsumer) createConfig() {
+	consumer.saramaConfig = sarama.NewConfig()
+	consumer.saramaConfig.Net.DialTimeout = time.Second * 5
+}
+
 func (consumer *KafkaConsumer) createConsumer() error {
+	consumer.createConfig()
 	saramaConsumer, err := sarama.NewConsumer([]string{consumer.kafkaBroker}, consumer.saramaConfig)
 	if err != nil {
 		consumer.log.Debugln("Error creating consumer: ", err)
@@ -155,19 +163,24 @@ func (consumer *KafkaConsumer) Start() {
 	consumer.log.Infof("Start consuming messages from broker %s and topic %s", consumer.kafkaBroker, consumer.kafkaTopic)
 	defer consumer.saramaPartitionConsumer.Close()
 	for {
-		message := <-consumer.saramaPartitionConsumer.Messages()
-		consumer.processMessage(message)
+		select {
+		case message := <-consumer.saramaPartitionConsumer.Messages():
+			consumer.processMessage(message)
+		case <-consumer.quitChan:
+			consumer.log.Infoln("Stop consumer with values: ", consumer.kafkaBroker, consumer.kafkaTopic)
+			return
+		}
 	}
 }
 
 func (consumer *KafkaConsumer) Stop() error {
-	consumer.log.Debugln("Stop consumer with values: ", consumer.kafkaBroker, consumer.kafkaTopic)
+	consumer.quitChan <- true
 	if err := consumer.saramaPartitionConsumer.Close(); err != nil {
-		consumer.log.Debugln("Error closing partition consumer: ", err)
+		consumer.log.Errorln("Error closing partition consumer: ", err)
 		return err
 	}
 	if err := consumer.saramaConsumer.Close(); err != nil {
-		consumer.log.Debugln("Error closing consumer: ", err)
+		consumer.log.Errorln("Error closing consumer: ", err)
 		return err
 	}
 	return nil

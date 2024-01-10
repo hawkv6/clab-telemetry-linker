@@ -15,6 +15,7 @@ var subsystem = "processor"
 
 type Processor interface {
 	Start()
+	Stop()
 }
 
 type DefaultProcessor struct {
@@ -22,6 +23,7 @@ type DefaultProcessor struct {
 	config             config.Config
 	unprocessedMsgChan chan consumer.Message
 	processedMsgChan   chan consumer.Message
+	quitChan           chan bool
 	helper             helpers.Helper
 }
 
@@ -31,6 +33,7 @@ func NewDefaultProcessor(config config.Config, unprocessedMsgChan chan consumer.
 		config:             config,
 		unprocessedMsgChan: unprocessedMsgChan,
 		processedMsgChan:   processedMsgChan,
+		quitChan:           make(chan bool),
 		helper:             helper,
 	}
 }
@@ -108,8 +111,18 @@ func (processor *DefaultProcessor) processMessage(msg consumer.Message) {
 }
 
 func (processor *DefaultProcessor) Start() {
+	processor.log.Infoln("Starting processing messages")
 	for {
-		msg := <-processor.unprocessedMsgChan
-		processor.processMessage(msg)
+		select {
+		case msg := <-processor.unprocessedMsgChan:
+			processor.processMessage(msg)
+		case <-processor.quitChan:
+			processor.log.Debug("Stopping processor")
+			return
+		}
 	}
+}
+
+func (processor *DefaultProcessor) Stop() {
+	processor.quitChan <- true
 }

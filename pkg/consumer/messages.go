@@ -5,15 +5,16 @@ type Message interface {
 }
 
 type TelemetryMessage struct {
+	Fields    map[string]interface{} `json:"fields,omitempty"`
 	Name      string                 `json:"name,omitempty"`
 	Tags      MessageTags            `json:"tags,omitempty"`
 	Timestamp int64                  `json:"timestamp,omitempty"`
-	Fields    map[string]interface{} `json:"fields,omitempty"`
 }
 
 type MessageTags struct {
 	Host          string `json:"host,omitempty"`
 	InterfaceName string `json:"interface_name,omitempty"`
+	Node          string `json:"node"`
 	Path          string `json:"path,omitempty"`
 	Source        string `json:"source,omitempty"`
 	Subscription  string `json:"subscription,omitempty"`
@@ -37,8 +38,4 @@ type BandwidthMessage struct {
 	Bandwidth float64 `json:"interface_status_and_data/enabled/bandwidth,omitempty"`
 }
 
-// func (TelemetryMessage) isMessage() {}
-
-func (DelayMessage) isMessage()     {}
-func (LossMessage) isMessage()      {}
-func (BandwidthMessage) isMessage() {}
+func (TelemetryMessage) isMessage() {}

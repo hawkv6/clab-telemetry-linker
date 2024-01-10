@@ -115,7 +115,7 @@ func TestDefaultConfig_setConfigFileLocation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			config := &DefaultConfig{configPath: "/home/hawkv6/.clab-telemetry-linker", fileName: "config.yaml"}
 			config.setConfigFileLocation()
-			assert.Equal(t, tt.want, config.fullFileLocation)
+			assert.Equal(t, tt.want, config.fullfileLocation)
 		})
 	}
 }
@@ -186,7 +186,7 @@ func TestDefaultConfig_setClabName(t *testing.T) {
 
 func TestDefaultConfig_doesConfigExists(t *testing.T) {
 	type fields struct {
-		fullFileLocation string
+		fullfileLocation string
 	}
 	tests := []struct {
 		name      string
@@ -197,7 +197,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 		{
 			name: "Test with file which exists",
 			fields: fields{
-				fullFileLocation: "/",
+				fullfileLocation: "/",
 			},
 			exists:    true,
 			wantError: false,
@@ -205,7 +205,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 		{
 			name: "Test with file which doesn't exists",
 			fields: fields{
-				fullFileLocation: "/doesnotexist",
+				fullfileLocation: "/doesnotexist",
 			},
 			wantError: false,
 			exists:    false,
@@ -213,7 +213,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 		{
 			name: "Test with file without permissions",
 			fields: fields{
-				fullFileLocation: "/root/.profile",
+				fullfileLocation: "/root/.profile",
 			},
 			wantError: true,
 			exists:    true,
@@ -223,7 +223,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			config := &DefaultConfig{
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
-				fullFileLocation: tt.fields.fullFileLocation,
+				fullfileLocation: tt.fields.fullfileLocation,
 			}
 			err, exists := config.doesConfigExist()
 			if tt.wantError {
@@ -239,7 +239,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 func TestDefaultConfig_createConfig(t *testing.T) {
 	type fields struct {
 		configPath       string
-		fullFileLocation string
+		fullfileLocation string
 	}
 	tests := []struct {
 		fields    fields
@@ -250,7 +250,7 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 			name: "Test valid file creation",
 			fields: fields{
 				configPath:       "/tmp/hawkv6",
-				fullFileLocation: "/tmp/hawkv6/config.yaml",
+				fullfileLocation: "/tmp/hawkv6/config.yaml",
 			},
 			wantError: false,
 		},
@@ -258,7 +258,7 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 			name: "Test invalid folder creation",
 			fields: fields{
 				configPath:       "/root/hawkv6",
-				fullFileLocation: "/root/hawkv6/config.yaml",
+				fullfileLocation: "/root/hawkv6/config.yaml",
 			},
 			wantError: true,
 		},
@@ -266,7 +266,7 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 			name: "Test invalid file creation",
 			fields: fields{
 				configPath:       "/",
-				fullFileLocation: "/config.yaml",
+				fullfileLocation: "/config.yaml",
 			},
 			wantError: true,
 		},
@@ -276,7 +276,7 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 			config := &DefaultConfig{
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
 				configPath:       tt.fields.configPath,
-				fullFileLocation: tt.fields.fullFileLocation,
+				fullfileLocation: tt.fields.fullfileLocation,
 			}
 			if tt.wantError {
 				assert.Error(t, config.createConfig())
@@ -290,7 +290,7 @@ func TestDefaultConfig_createConfig(t *testing.T) {
 func TestDefaultConfig_readConfig(t *testing.T) {
 	type fields struct {
 		configPath       string
-		fullFileLocation string
+		fullfileLocation string
 	}
 	tests := []struct {
 		fields    fields
@@ -302,7 +302,7 @@ func TestDefaultConfig_readConfig(t *testing.T) {
 			name: "Test read valid config",
 			fields: fields{
 				configPath:       ".",
-				fullFileLocation: "config-example.yaml",
+				fullfileLocation: "config-example.yaml",
 			},
 			want:      "clab-hawkv6",
 			wantError: false,
@@ -310,7 +310,7 @@ func TestDefaultConfig_readConfig(t *testing.T) {
 		{
 			name: "Test read invalid config",
 			fields: fields{
-				fullFileLocation: "/nofileexists",
+				fullfileLocation: "/nofileexists",
 			},
 			wantError: true,
 		},
@@ -321,7 +321,7 @@ func TestDefaultConfig_readConfig(t *testing.T) {
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
 				koanfInstance:    koanf.New("."),
 				configPath:       tt.fields.configPath,
-				fullFileLocation: tt.fields.fullFileLocation,
+				fullfileLocation: tt.fields.fullfileLocation,
 				helper:           helpers.NewDefaultHelper(),
 			}
 			if tt.wantError {
@@ -337,7 +337,7 @@ func TestDefaultConfig_readConfig(t *testing.T) {
 func TestDefaultConfig_initConfig(t *testing.T) {
 	type fields struct {
 		configPath       string
-		fullFileLocation string
+		fullfileLocation string
 	}
 	tests := []struct {
 		fields    fields
@@ -348,28 +348,28 @@ func TestDefaultConfig_initConfig(t *testing.T) {
 			name: "Test init valid config",
 			fields: fields{
 				configPath:       "/tmp/hawkv6",
-				fullFileLocation: "/tmp/hawkv6/config.yaml",
+				fullfileLocation: "/tmp/hawkv6/config.yaml",
 			},
 			wantError: false,
 		},
 		{
 			name: "Test init invalid config",
 			fields: fields{
-				fullFileLocation: "/nofileexists",
+				fullfileLocation: "/nofileexists",
 			},
 			wantError: true,
 		},
 		{
 			name: "Test with file without permissions",
 			fields: fields{
-				fullFileLocation: "/root/.profile",
+				fullfileLocation: "/root/.profile",
 			},
 			wantError: true,
 		},
 		{
 			name: "Test non parseable config",
 			fields: fields{
-				fullFileLocation: "/root",
+				fullfileLocation: "/root",
 			},
 			wantError: true,
 		},
@@ -380,7 +380,7 @@ func TestDefaultConfig_initConfig(t *testing.T) {
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
 				koanfInstance:    koanf.New("."),
 				configPath:       tt.fields.configPath,
-				fullFileLocation: tt.fields.fullFileLocation,
+				fullfileLocation: tt.fields.fullfileLocation,
 			}
 			if tt.wantError {
 				assert.Error(t, config.InitConfig())
@@ -487,7 +487,7 @@ func TestDefaultConfig_DeleteValue(t *testing.T) {
 }
 func TestDefaultConfig_WriteConfig(t *testing.T) {
 	type fields struct {
-		fullFileLocation string
+		fullfileLocation string
 		configPath       string
 	}
 	type args struct {
@@ -504,7 +504,7 @@ func TestDefaultConfig_WriteConfig(t *testing.T) {
 			name: "Write valid config",
 			fields: fields{
 				configPath:       "/tmp/hawkv6/",
-				fullFileLocation: "/tmp/hawkv6/config.yaml",
+				fullfileLocation: "/tmp/hawkv6/config.yaml",
 			},
 			args: args{
 				key:   "test",
@@ -515,7 +515,7 @@ func TestDefaultConfig_WriteConfig(t *testing.T) {
 		{
 			name: "Test init invalid config",
 			fields: fields{
-				fullFileLocation: "/root/.profile",
+				fullfileLocation: "/root/.profile",
 			},
 			wantError: true,
 		},
@@ -526,7 +526,7 @@ func TestDefaultConfig_WriteConfig(t *testing.T) {
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
 				koanfInstance:    koanf.New("."),
 				configPath:       tt.fields.configPath,
-				fullFileLocation: tt.fields.fullFileLocation,
+				fullfileLocation: tt.fields.fullfileLocation,
 			}
 			if !tt.wantError {
 				assert.NoError(t, config.InitConfig())
@@ -557,7 +557,7 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 				userHome:         "/tmp/hawkv6",
 				fileName:         "config.yaml",
 				configPath:       "/tmp/hawkv6/.clab-telemetry-linker",
-				fullFileLocation: "/tmp/hawkv6/.clab-telemetry-linker/config.yaml",
+				fullfileLocation: "/tmp/hawkv6/.clab-telemetry-linker/config.yaml",
 				clabNameKey:      "clab-name",
 				clabName:         "clab-hawkv6",
 			},
@@ -604,7 +604,7 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 				assert.Equal(t, tt.want.userHome, defaultConfig.userHome)
 				assert.Equal(t, tt.want.fileName, defaultConfig.fileName)
 				assert.Equal(t, tt.want.configPath, defaultConfig.configPath)
-				assert.Equal(t, tt.want.fullFileLocation, defaultConfig.fullFileLocation)
+				assert.Equal(t, tt.want.fullfileLocation, defaultConfig.fullfileLocation)
 				assert.Equal(t, tt.want.clabNameKey, defaultConfig.clabNameKey)
 				assert.Equal(t, tt.want.clabName, defaultConfig.clabName)
 

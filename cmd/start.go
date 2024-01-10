@@ -27,15 +27,20 @@ var startCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error creating config: %v\n", err)
 		}
+		if err := defaultConfig.WatchConfigChange(); err != nil {
+			log.Fatalf("Error watching config change: %v\n", err)
+		}
 		unprocessedMsgChan := make(chan consumer.Message)
 		processedMsgChan := make(chan consumer.Message)
 		consumer := consumer.NewKafkaConsumer(KafkaBroker, ReceiverTopic, unprocessedMsgChan)
 		if err := consumer.Init(); err != nil {
 			log.Fatalf("Error initializing receiver: %v\n", err)
 		}
-
+		publisher := publisher.NewDefaultPublisher(KafkaBroker, PublisherTopic, processedMsgChan)
+		if err := publisher.Init(); err != nil {
+			log.Fatalf("Error initializing publisher: %v\n", err)
+		}
 		processor := processor.NewDefaultProcessor(defaultConfig, unprocessedMsgChan, processedMsgChan, helpers.NewDefaultHelper())
-		publisher := publisher.NewDefaultPublisher(processedMsgChan)
 
 		defaultService := service.NewDefaultService(defaultConfig, consumer, processor, publisher)
 		if err := defaultService.Start(); err != nil {
@@ -46,9 +51,7 @@ var startCmd = &cobra.Command{
 
 		<-signalChan
 		log.Info("Received interrupt signal, shutting down")
-		if err := defaultService.Stop(); err != nil {
-			log.Fatalf("Error stopping service: %v\n", err)
-		}
+		defaultService.Stop()
 	},
 }
 
