@@ -607,7 +607,6 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 				assert.Equal(t, tt.want.fullfileLocation, defaultConfig.fullfileLocation)
 				assert.Equal(t, tt.want.clabNameKey, defaultConfig.clabNameKey)
 				assert.Equal(t, tt.want.clabName, defaultConfig.clabName)
-
 			}
 		})
 	}
@@ -629,6 +628,44 @@ func TestDefaultConfig_NewDefaultConfig(t *testing.T) {
 				assert.Error(t, err)
 				assert.Nil(t, config)
 			}
+		})
+	}
+}
+
+func TestDefaultConfig_WatchConfigChange(t *testing.T) {
+	tests := []struct {
+		name      string
+		wantError bool
+		want      *DefaultConfig
+	}{
+		{
+			name:      "Test config Change",
+			wantError: false,
+			want: &DefaultConfig{
+				userHome:         "/tmp/hawkv6",
+				fileName:         "config.yaml",
+				configPath:       "/tmp/hawkv6/.clab-telemetry-linker",
+				fullfileLocation: "/tmp/hawkv6/.clab-telemetry-linker/config.yaml",
+				clabNameKey:      "clab-name",
+				clabName:         "clab-hawkv6",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			// helper := helpers.NewDefaultHelper()
+			helper := helpers.NewMockHelper(ctrl)
+			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey).AnyTimes()
+			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName).AnyTimes()
+			helper.EXPECT().GetUserHome().Return(nil, tt.want.userHome)
+
+			err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+			assert.NoError(t, err)
+			err = defaultConfig.WatchConfigChange()
+			assert.NoError(t, os.WriteFile(defaultConfig.fullfileLocation, []byte("clab-name: new-name"), 0644))
+			assert.NoError(t, err)
+			os.RemoveAll(defaultConfig.configPath)
 		})
 	}
 }

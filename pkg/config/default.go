@@ -48,10 +48,6 @@ func (config *DefaultConfig) setConfigFileName(configName string) {
 	}
 }
 
-func (config *DefaultConfig) GetConfigPath() string {
-	return config.fullfileLocation
-}
-
 func (config *DefaultConfig) setConfigPath() {
 	config.configPath = config.userHome + "/.clab-telemetry-linker"
 }
@@ -127,7 +123,6 @@ func (config *DefaultConfig) InitConfig() error {
 }
 func (config *DefaultConfig) WatchConfigChange() error {
 	if err := config.fileProvider.Watch(func(event interface{}, err error) {
-
 		if err != nil {
 			config.log.Errorf("Error watching config file: %v", err)
 		}
