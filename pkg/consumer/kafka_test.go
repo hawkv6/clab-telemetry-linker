@@ -830,6 +830,62 @@ func TestKafkaConsumer_processMessage(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Test processMessage with invalid isis bandwidth message",
+			fields: fields{
+				kafkaBroker:        "localhost:9092",
+				kafkaTopic:         "test",
+				unprocessedMsgChan: make(chan Message),
+			},
+			args: args{
+				message: &sarama.ConsumerMessage{
+					Value: []byte(`{
+						"fields": {
+							"interface_status_and_data/enabled/bandwidth": "invalid"
+						},
+						"name": "isis",
+						"tags": {
+							"host": "telegraf",
+							"instance_name": "1",
+							"interface_name": "GigabitEthernet0/0/0/0",
+							"path": "Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface",
+							"source": "XR-1",
+							"subscription": "hawk-metrics"
+						},
+						"timestamp": 1704728369
+					}`),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test processMessage with invalid unknown message",
+			fields: fields{
+				kafkaBroker:        "localhost:9092",
+				kafkaTopic:         "test",
+				unprocessedMsgChan: make(chan Message),
+			},
+			args: args{
+				message: &sarama.ConsumerMessage{
+					Value: []byte(`{
+						"fields": {
+							"interface_status_and_data/enabled/bandwidth": "invalid"
+						},
+						"name": "unknown",
+						"tags": {
+							"host": "telegraf",
+							"instance_name": "1",
+							"interface_name": "GigabitEthernet0/0/0/0",
+							"path": "Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface",
+							"source": "XR-1",
+							"subscription": "hawk-metrics"
+						},
+						"timestamp": 1704728369
+					}`),
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "Test processMessage with invalid message",
 			fields: fields{
 				kafkaBroker:        "localhost:9092",
