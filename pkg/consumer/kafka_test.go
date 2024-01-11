@@ -428,6 +428,10 @@ func TestKafkaConsumer_UnmarshalDelayMessage(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, delayMsg)
+				assert.Equal(t, delayMsg.Average, 10000.0)
+				assert.Equal(t, delayMsg.Maximum, 10000.0)
+				assert.Equal(t, delayMsg.Minimum, 10000.0)
+				assert.Equal(t, delayMsg.Variance, 0.0)
 			}
 		})
 	}
@@ -628,12 +632,12 @@ func TestKafkaConsumer_UnmarshalLossMessage(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
 			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, delayMsg := kafkaConsumer.UnmarshalIsisMessage(*telemetryMsg)
+			err, isisMsg := kafkaConsumer.UnmarshalLossMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, delayMsg)
+				assert.NotNil(t, isisMsg)
 			}
 		})
 	}
@@ -716,12 +720,13 @@ func TestKafkaConsumer_UnmarshalBandwidthMessage(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
 			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, delayMsg := kafkaConsumer.UnmarshalIsisMessage(*telemetryMsg)
+			err, bwMsg := kafkaConsumer.UnmarshalBandwidthMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, delayMsg)
+				assert.NotNil(t, bwMsg)
+				assert.Equal(t, bwMsg.Bandwidth, 1000000.0)
 			}
 		})
 	}

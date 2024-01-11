@@ -100,6 +100,7 @@ func (config *DefaultConfig) createConfig() error {
 func (config *DefaultConfig) readConfig() error {
 	config.log.Infoln("Read config file: ", config.fullfileLocation)
 	config.fileProvider = file.Provider(config.fullfileLocation)
+	config.koanfInstance = koanf.New(".")
 	if err := config.koanfInstance.Load(config.fileProvider, yaml.Parser()); err != nil {
 		return err
 	}
