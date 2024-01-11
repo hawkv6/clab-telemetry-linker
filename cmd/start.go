@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 	"os/signal"
-	"sync"
 
 	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/consumer"
@@ -50,13 +49,7 @@ var startCmd = &cobra.Command{
 
 		<-signalChan
 		log.Info("Received interrupt signal, shutting down")
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			defaultService.Stop()
-		}()
-		wg.Wait()
+		defaultService.Stop()
 	},
 }
 

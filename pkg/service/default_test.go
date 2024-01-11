@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hawkv6/clab-telemetry-linker/pkg/config"
 	"github.com/hawkv6/clab-telemetry-linker/pkg/consumer"
@@ -49,10 +50,13 @@ func TestDefaultService_Start(t *testing.T) {
 			processor := processor.NewMockProcessor(ctrl)
 			publisher := publisher.NewMockPublisher(ctrl)
 			consumer.EXPECT().Start().Return()
-			processor.EXPECT().Start().Return().AnyTimes()
-			publisher.EXPECT().Start().Return().AnyTimes()
+			processor.EXPECT().Start().Return()
+			publisher.EXPECT().Start().Return()
 			defaultService := NewDefaultService(config, consumer, processor, publisher)
-			defaultService.Start()
+			assert.NotPanics(t, func() {
+				defaultService.Start()
+				time.Sleep(3 * time.Second)
+			})
 		})
 	}
 }

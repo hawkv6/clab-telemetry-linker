@@ -128,7 +128,7 @@ func (publisher *KafkaPublisher) Start() {
 		case msg := <-publisher.processedMsgChan:
 			publisher.publishMessage(msg)
 		case <-publisher.quitChan:
-			publisher.log.Infoln("Stopping publisher with broker ", publisher.kafkaBroker, " and topic ", publisher.kafkaTopic, " and quitChan: ", publisher.quitChan)
+			publisher.log.Infoln("Stopping publisher with broker ", publisher.kafkaBroker, " and topic ", publisher.kafkaTopic)
 			return
 		}
 	}
