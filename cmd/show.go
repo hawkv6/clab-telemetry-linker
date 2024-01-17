@@ -14,7 +14,7 @@ var showCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err, defaultConfig := config.NewDefaultConfig()
 		if err != nil {
-			log.Fatalf("Error creating config: %v\n", err)
+			log.Fatalf("Error reading/creating config: %v\n", err)
 		}
 		helper := helpers.NewDefaultHelper()
 		command := command.NewDefaultShowCommand(Node, defaultConfig.GetValue(helper.GetDefaultClabNameKey()))

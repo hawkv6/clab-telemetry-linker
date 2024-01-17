@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "in_octets": 47912820356,
+        "out_octets": 1864216230
+    },
+    "name": "utilization",
+    "tags": {
+        "host": "telegraf",
+        "name": "GigabitEthernet0/0/0/0",
+        "path": "openconfig-interfaces:interfaces/interface/state/counters",
+        "source": "XR-1",
+        "subscription": "hawk-metrics"
+    },
+    "timestamp": 1704728433
+}

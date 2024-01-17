@@ -21,9 +21,10 @@ type DefaultConfig struct {
 	userHome         string
 	fileName         string
 	configPath       string
-	fullFileLocation string
+	fullfileLocation string
 	clabName         string
 	clabNameKey      string
+	fileProvider     *file.File
 	helper           helpers.Helper
 }
 
@@ -51,7 +52,7 @@ func (config *DefaultConfig) setConfigPath() {
 	config.configPath = config.userHome + "/.clab-telemetry-linker"
 }
 func (config *DefaultConfig) setConfigFileLocation() {
-	config.fullFileLocation = config.configPath + "/" + config.fileName
+	config.fullfileLocation = config.configPath + "/" + config.fileName
 }
 
 func (config *DefaultConfig) setClabName(clabName string) error {
@@ -73,8 +74,8 @@ func (config *DefaultConfig) setClabName(clabName string) error {
 }
 
 func (config *DefaultConfig) doesConfigExist() (error, bool) {
-	config.log.Debugln("Check if config file exists:", config.fullFileLocation)
-	if _, err := os.Stat(config.fullFileLocation); err != nil {
+	config.log.Debugln("Check if config file exists:", config.fullfileLocation)
+	if _, err := os.Stat(config.fullfileLocation); err != nil {
 		if os.IsNotExist(err) {
 			return nil, false
 		}
@@ -88,7 +89,7 @@ func (config *DefaultConfig) createConfig() error {
 	if err := os.MkdirAll(config.configPath, 0755); err != nil {
 		return err
 	}
-	configFile, err := os.Create(config.fullFileLocation)
+	configFile, err := os.Create(config.fullfileLocation)
 	if err != nil {
 		return err
 	}
@@ -97,8 +98,10 @@ func (config *DefaultConfig) createConfig() error {
 }
 
 func (config *DefaultConfig) readConfig() error {
-	config.log.Debugln("Read config file: ", config.fullFileLocation)
-	if err := config.koanfInstance.Load(file.Provider(config.fullFileLocation), yaml.Parser()); err != nil {
+	config.log.Infoln("Read config file: ", config.fullfileLocation)
+	config.fileProvider = file.Provider(config.fullfileLocation)
+	config.koanfInstance = koanf.New(".")
+	if err := config.koanfInstance.Load(config.fileProvider, yaml.Parser()); err != nil {
 		return err
 	}
 	return nil
@@ -119,6 +122,20 @@ func (config *DefaultConfig) InitConfig() error {
 	}
 	return nil
 }
+func (config *DefaultConfig) WatchConfigChange() error {
+	if err := config.fileProvider.Watch(func(event interface{}, err error) {
+		if err != nil {
+			config.log.Errorf("Error watching config file: %v", err)
+		}
+		config.log.Debugln("Config file changed")
+		if err := config.readConfig(); err != nil {
+			config.log.Errorf("Error reading config file: %v", err)
+		}
+	}); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (config *DefaultConfig) DeleteValue(key string) {
 	config.log.Debugln("Delete value from config: ", key)
@@ -134,18 +151,23 @@ func (config *DefaultConfig) SetValue(key string, value interface{}) error {
 }
 
 func (config *DefaultConfig) GetValue(key string) string {
-	config.log.Debugln("Get value from config: ", key)
-	return config.koanfInstance.String(key)
+	value := config.koanfInstance.String(key)
+	if value == "" {
+		config.log.Debugf("No value found in config for key: %s", key)
+	} else {
+		config.log.Debugf("value from config: %s = %s", key, value)
+	}
+	return value
 }
 
 func (config *DefaultConfig) WriteConfig() error {
-	config.log.Debugln("Write config file: ", config.fullFileLocation)
+	config.log.Debugln("Write config file: ", config.fullfileLocation)
 	data, err := config.koanfInstance.Marshal(yaml.Parser())
 	if err != nil {
 		config.log.Errorf("error marshalling config: %v", err)
 		return err
 	}
-	if err := os.WriteFile(config.fullFileLocation, data, 0644); err != nil {
+	if err := os.WriteFile(config.fullfileLocation, data, 0644); err != nil {
 		config.log.Errorf("error writing config: %v", err)
 		return err
 	}

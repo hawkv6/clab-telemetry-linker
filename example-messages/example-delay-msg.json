@@ -1,0 +1,18 @@
+{
+  "fields": {
+    "delay_measurement_session/last_advertisement_information/advertised_values/average": 10000,
+    "delay_measurement_session/last_advertisement_information/advertised_values/maximum": 10000,
+    "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
+    "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
+  },
+  "name": "performance_monitoring",
+  "tags": {
+    "host": "telegraf",
+    "interface_name": "GigabitEthernet0/0/0/1",
+    "node": "0/RP0/CPU0",
+    "path": "Cisco-IOS-XR-perf-meas-oper:performance-measurement/nodes/node/interfaces/interface-details/interface-detail",
+    "source": "XR-1",
+    "subscription": "hawk-metrics"
+  },
+  "timestamp": 1704728135
+}

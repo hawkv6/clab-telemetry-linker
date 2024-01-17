@@ -44,7 +44,7 @@ func TestNewDefaultSetter(t *testing.T) {
 			helper := helpers.NewDefaultHelper()
 			config.EXPECT().GetValue(helper.GetDefaultClabNameKey()).Return("clab-name").AnyTimes()
 			tt.want.config = config
-			tt.want.impairmentsPrefix = helper.SetDefaultImpairmentsPrefix(tt.args.node, tt.args.interface_)
+			tt.want.impairmentsPrefix = helper.GetDefaultImpairmentsPrefix(tt.args.node, tt.args.interface_)
 			tt.want.command = command.NewDefaultSetCommand(tt.args.node, tt.args.interface_, config.GetValue(helper.GetDefaultClabNameKey()))
 			assert.Equal(t, tt.want, NewDefaultSetter(config, tt.args.node, tt.args.interface_, tt.args.helper, tt.want.command))
 

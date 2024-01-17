@@ -7,8 +7,6 @@ import (
 	"github.com/hawkv6/clab-telemetry-linker/pkg/logging"
 )
 
-var subsystem = "command"
-
 type SetCommand interface {
 	AddDelay(uint64)
 	AddJitter(uint64)
