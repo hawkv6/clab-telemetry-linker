@@ -133,7 +133,7 @@ func (consumer *KafkaConsumer) processMessage(message *sarama.ConsumerMessage) {
 	if err != nil {
 		return
 	}
-	if telemetryMessage.Name == "performance_monitoring" {
+	if telemetryMessage.Name == "performance-measurement" {
 		err, delayMessage := consumer.UnmarshalDelayMessage(*telemetryMessage)
 		if err != nil {
 			return

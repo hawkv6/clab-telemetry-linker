@@ -204,7 +204,7 @@ func TestDefaultProcessor_setDelayValues(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := consumer.DelayMessage{
 				TelemetryMessage: consumer.TelemetryMessage{
-					Name: "performance_monitoring",
+					Name: "performance-measurement",
 					Tags: consumer.MessageTags{
 						Host:          "telegraf",
 						InterfaceName: "GigabitEthernet0/0/0/0",
@@ -288,7 +288,7 @@ func TestDefaultProcessor_processDelayMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := consumer.DelayMessage{
 				TelemetryMessage: consumer.TelemetryMessage{
-					Name: "performance_monitoring",
+					Name: "performance-measurement",
 					Tags: consumer.MessageTags{
 						Host:          "telegraf",
 						InterfaceName: tt.fields.Interface,
@@ -683,7 +683,7 @@ func TestDefaultProcessor_processMessage(t *testing.T) {
 			name: "Test with valid Delay message",
 			msg: &consumer.DelayMessage{
 				TelemetryMessage: consumer.TelemetryMessage{
-					Name: "performance_monitoring",
+					Name: "performance-measurement",
 					Tags: consumer.MessageTags{
 						Host:          "telegraf",
 						InterfaceName: "GigabitEthernet0/0/0/0",

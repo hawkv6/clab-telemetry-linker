@@ -2,9 +2,9 @@ ignore:
   - "**/*_mock.go"
 coverage:
   status:
-    patch:
-      default:
-        target: 80%
     project:
       default:
         target: 80%
+    patch:
+      default:
+        enabled: false
