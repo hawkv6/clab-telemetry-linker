@@ -221,7 +221,7 @@ func TestKafkaConsumer_UnmarshalTelemetryMessage(t *testing.T) {
 						  "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
 						  "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
 						},
-						"name": "performance_monitoring",
+						"name": "performance-measurement",
 						"tags": {
 						  "host": "telegraf",
 						  "interface_name": "GigabitEthernet0/0/0/1",
@@ -342,7 +342,7 @@ func TestKafkaConsumer_UnmarshalDelayMessage(t *testing.T) {
 						  "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
 						  "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
 						},
-						"name": "performance_monitoring",
+						"name": "performance-measurement",
 						"tags": {
 						  "host": "telegraf",
 						  "interface_name": "GigabitEthernet0/0/0/1",
@@ -373,7 +373,7 @@ func TestKafkaConsumer_UnmarshalDelayMessage(t *testing.T) {
 						  "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
 						  "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
 						},
-						"name": "performance_monitoring",
+						"name": "performance-measurement",
 						"tags": {
 						  "host": "telegraf",
 						  "interface_name": "GigabitEthernet0/0/0/1",
@@ -468,7 +468,7 @@ func TestKafkaConsumer_UnmarshalIsisMessage(t *testing.T) {
 						  "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
 						  "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
 						},
-						"name": "performance_monitoring",
+						"name": "performance-measurement",
 						"tags": {
 						  "host": "telegraf",
 						  "interface_name": "GigabitEthernet0/0/0/1",
@@ -791,7 +791,7 @@ func TestKafkaConsumer_processMessage(t *testing.T) {
 						  "delay_measurement_session/last_advertisement_information/advertised_values/minimum": 10000,
 						  "delay_measurement_session/last_advertisement_information/advertised_values/variance": 0
 						},
-						"name": "performance_monitoring",
+						"name": "performance-measurement",
 						"tags": {
 						  "host": "telegraf",
 						  "interface_name": "GigabitEthernet0/0/0/1",

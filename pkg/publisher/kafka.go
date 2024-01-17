@@ -2,7 +2,6 @@ package publisher
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -117,7 +116,7 @@ func (publisher *KafkaPublisher) publishMessage(msg consumer.Message) {
 	case publisher.producer.Input() <- &sarama.ProducerMessage{Topic: publisher.kafkaTopic, Key: nil, Value: sarama.ByteEncoder(encodedMsg)}:
 		publisher.log.Debugf("Successfully enqueued message %v on topic %s\n", string(encodedMsg), publisher.kafkaTopic)
 	case err := <-publisher.producer.Errors():
-		log.Println("Failed to produce message", err)
+		publisher.log.Errorln("Failed to produce message", err)
 	}
 }
 
