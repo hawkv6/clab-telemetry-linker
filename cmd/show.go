@@ -16,6 +16,9 @@ var showCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error reading/creating config: %v\n", err)
 		}
+		if defaultConfig.GetValue("nodes."+Node) == "" {
+			log.Fatalf("Node %s not found in config\n", Node)
+		}
 		helper := helpers.NewDefaultHelper()
 		command := command.NewDefaultShowCommand(Node, defaultConfig.GetValue(helper.GetDefaultClabNameKey()))
 		manager := impairments.NewDefaultViewer(Node, command)

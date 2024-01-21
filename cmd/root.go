@@ -27,37 +27,14 @@ func markRequiredFlags(cmd *cobra.Command, flags []string) {
 
 var rootCmd = &cobra.Command{
 	Use:   "clab-telemetry-linker",
-	Short: "clab-telemetry-linker is a tool to enricht telemetry with containerlab impairments",
-	Long: `
-	clab-telemetry-linker is a tool to enricht telemetry with containerlab impairments
-
-	Start the tool to listen for telemetry data, enrich it with the containerlab impairements and send it to kafka
-	clab-telemetry-linker start --input-topic telemetry --output-topic telemetry-enriched --kafka-broker localhost:9092
-
-	Set the impairments on the containerlab interface
-	clab-telemetry-linker set -n clab-hawkv6-XR-1 -i Gi0-0-0-0 --delay 1ms --jitter 1ms --loss 5 --rate 100
-	-----------+-------+--------+-------------+-------------+
-	| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-	+-----------+-------+--------+-------------+-------------+
-	| Gi0-0-0-0 | 1ms   | 1ms    | 5.00%       |         100 |
-	+-----------+-------+--------+-------------+-------------+
-
-	clab-telemetry-linker show -n clab-hawkv6-XR-1 -i Gi0-0-0-1
-	+-----------+-------+--------+-------------+-------------+
-	| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-	+-----------+-------+--------+-------------+-------------+
-	| Gi0-0-0-1 | 100ms | 0s     | 10.00%      |           0 |
-	+-----------+-------+--------+-------------+-------------+
-
-	clab-telemetry-linker delete -n clab-hawkv6-XR-1 -i Gi0-0-0-0
-	+-----------+-------+--------+-------------+-------------+
-	| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-	+-----------+-------+--------+-------------+-------------+
-	| Gi0-0-0-0 | 0ms   | 0s     | 0.00%       |           0 |
-	+-----------+-------+--------+-------------+-------------+
-
-	clab-telemetry-linker will forward the impairments to the specific containerlab command
-	More information: https://containerlab.dev/cmd/tools/netem/set/
+	Short: "clab-telemetry-linker is a tool to enrich telemetry data with the underlying containerlab impairments",
+	Long: `clab-telemetry-linker is a tool to enrich telemetry data with the underlying containerlab impairments
+More detailed info: https://github.com/hawkv6/clab-telemetry-linker
+Example usage:
+	sudo clab-telemetry-linker start -b 172.16.19.77:9094 -r hawkv6.telemetry.unprocessed -p hawkv6.telemetry.processed
+	sudo clab-telemetry-linker set -n XR-1 -i Gi0-0-0-0 --delay 1ms --jitter 1ms --loss 5 --rate 100000 	
+	sudo clab-telemetry-linker show -n XR-1 	
+	sudo clab-telemetry-linker delete -n XR-1 -i Gi0-0-0-0
 	`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if !helpers.NewDefaultHelper().IsRoot() {
