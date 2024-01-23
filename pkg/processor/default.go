@@ -72,8 +72,8 @@ func (processor *DefaultProcessor) setDelayValues(msg *consumer.DelayMessage, de
 		msg.Average = msg.Average + (delay + delay*randomFactor)
 	}
 	if jitter == 0.0 {
-		msg.Maximum = msg.Average + msg.Average*randomFactor
-		msg.Minimum = msg.Average - msg.Average*randomFactor
+		msg.Maximum = msg.Average + math.Abs(msg.Average*randomFactor)
+		msg.Minimum = msg.Average - math.Abs(msg.Average*randomFactor)
 		msg.Variance = msg.Maximum - msg.Minimum
 	} else {
 		msg.Maximum = msg.Average + 0.5*jitter
