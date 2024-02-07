@@ -82,9 +82,9 @@ func TestDefaultProcessor_getDelayValues(t *testing.T) {
 	tests := []struct {
 		name        string
 		delay       string
-		delayValue  float64
+		delayValue  uint32
 		jitter      string
-		jitterValue float64
+		jitterValue uint32
 		wantErr     bool
 	}{
 		{
@@ -138,8 +138,8 @@ func TestDefaultProcessor_getDelayValues(t *testing.T) {
 			err, delay, jitter := processor.getDelayValues(impairmentsPrefix)
 			if tt.wantErr {
 				assert.Error(t, err)
-				assert.Equal(t, 0.0, delay)
-				assert.Equal(t, 0.0, jitter)
+				assert.Equal(t, uint32(0), delay)
+				assert.Equal(t, uint32(0), jitter)
 			} else {
 				assert.Equal(t, tt.delayValue, delay)
 				assert.Equal(t, tt.jitterValue, jitter)
@@ -151,15 +151,15 @@ func TestDefaultProcessor_getDelayValues(t *testing.T) {
 
 func TestDefaultProcessor_setDelayValues(t *testing.T) {
 	type want struct {
-		Average  float64
-		Maximum  float64
-		Minimum  float64
-		Variance float64
+		Average  uint32
+		Maximum  uint32
+		Minimum  uint32
+		Variance uint32
 	}
 	tests := []struct {
 		name         string
-		delay        float64
-		jitter       float64
+		delay        uint32
+		jitter       uint32
 		randomFactor float64
 		want         want
 	}{

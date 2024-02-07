@@ -81,7 +81,7 @@ func (consumer *KafkaConsumer) UnmarshalTelemetryMessage(message *sarama.Consume
 func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryMessage) (error, *DelayMessage) {
 	delayMessage := DelayMessage{TelemetryMessage: telemetryMessage}
 
-	fields := map[string]*float64{
+	fields := map[string]*uint32{
 		"delay_measurement_session/last_advertisement_information/advertised_values/average":  &delayMessage.Average,
 		"delay_measurement_session/last_advertisement_information/advertised_values/minimum":  &delayMessage.Minimum,
 		"delay_measurement_session/last_advertisement_information/advertised_values/maximum":  &delayMessage.Maximum,
@@ -90,9 +90,9 @@ func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryM
 	for key, field := range fields {
 		value, ok := telemetryMessage.Fields[key].(float64)
 		if !ok {
-			return fmt.Errorf("unable to convert %s to float", key), nil
+			return fmt.Errorf("unable to convert %s to float64", key), nil
 		}
-		*field = value
+		*field = uint32(value)
 	}
 	return nil, &delayMessage
 }
