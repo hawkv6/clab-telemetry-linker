@@ -428,10 +428,10 @@ func TestKafkaConsumer_UnmarshalDelayMessage(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, delayMsg)
-				assert.Equal(t, delayMsg.Average, 10000.0)
-				assert.Equal(t, delayMsg.Maximum, 10000.0)
-				assert.Equal(t, delayMsg.Minimum, 10000.0)
-				assert.Equal(t, delayMsg.Variance, 0.0)
+				assert.Equal(t, delayMsg.Average, uint32(10000))
+				assert.Equal(t, delayMsg.Maximum, uint32(10000))
+				assert.Equal(t, delayMsg.Minimum, uint32(10000))
+				assert.Equal(t, delayMsg.Variance, uint32(0))
 			}
 		})
 	}

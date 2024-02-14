@@ -61,10 +61,10 @@ func (publisher *KafkaPublisher) encodeTags(enc *lineprotocol.Encoder, tags cons
 func (publisher *KafkaPublisher) encodeDelayMessage(msg consumer.DelayMessage) (error, []byte) {
 	enc := publisher.createEncoder(msg.TelemetryMessage)
 	publisher.encodeTags(&enc, msg.Tags)
-	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/average", lineprotocol.MustNewValue(msg.Average))
-	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/maximum", lineprotocol.MustNewValue(msg.Maximum))
-	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/minimum", lineprotocol.MustNewValue(msg.Minimum))
-	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/variance", lineprotocol.MustNewValue(msg.Variance))
+	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/average", lineprotocol.MustNewValue(float64(msg.Average)))
+	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/maximum", lineprotocol.MustNewValue(float64(msg.Maximum)))
+	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/minimum", lineprotocol.MustNewValue(float64(msg.Minimum)))
+	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/variance", lineprotocol.MustNewValue(float64(msg.Variance)))
 	enc.EndLine(time.Unix(msg.Timestamp, 0))
 	if err := enc.Err(); err != nil {
 		return err, nil

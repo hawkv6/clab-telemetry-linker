@@ -43,41 +43,54 @@ func (processor *DefaultProcessor) shortenInterfaceName(name string) (error, str
 	return nil, re.ReplaceAllString(name, "Gi$1-$2-$3-$4")
 }
 
-func (processor *DefaultProcessor) getDelayValues(impairmentsPrefix string) (error, float64, float64) {
+func (processor *DefaultProcessor) getDelayValues(impairmentsPrefix string) (error, uint32, uint32) {
 	delay := processor.config.GetValue(impairmentsPrefix + "delay")
-	delayValueUsec := 0.0
-	jitterValueUsec := 0.0
+	var delayMicroSec uint32 = 0
+	var jitterMicroSec uint32 = 0
 	if delay != "" {
-		delayValue, err := strconv.ParseFloat(delay, 64)
-		delayValueUsec = delayValue * 1000
+		delayValue64, err := strconv.ParseUint(delay, 10, 32)
 		if err != nil {
-			return fmt.Errorf("Failed to convert delay to float64: %v", err), 0, 0
+			return fmt.Errorf("Failed to convert delay to uint64: %v", err), 0, 0
 		}
+		delayValue := uint32(delayValue64)
+		delayMicroSec = delayValue * 1000
+
 		jitter := processor.config.GetValue(impairmentsPrefix + "jitter")
 		if jitter != "" {
-			jitterValue, err := strconv.ParseFloat(jitter, 64)
+			jitterValue64, err := strconv.ParseUint(jitter, 10, 32)
 			if err != nil {
 				return fmt.Errorf("Failed to convert jitter to float64: %v", err), 0, 0
 			}
-			jitterValueUsec = jitterValue * 1000
+			jitterValue := uint32(jitterValue64)
+			jitterMicroSec = jitterValue * 1000
 		}
 	}
-	return nil, delayValueUsec, jitterValueUsec
+	return nil, delayMicroSec, jitterMicroSec
 }
 
-func (processor *DefaultProcessor) setDelayValues(msg *consumer.DelayMessage, delay float64, jitter float64, randomFactor float64) {
-	if delay == 0.0 {
-		msg.Average = msg.Average + msg.Average*randomFactor
+func (processor *DefaultProcessor) setDelayValues(msg *consumer.DelayMessage, delay uint32, jitter uint32, randomFactor float64) {
+	if delay == 0 {
+		msg.Average = msg.Average + uint32(float64(msg.Average)*randomFactor)
 	} else {
-		msg.Average = msg.Average + (delay + delay*randomFactor)
+		msg.Average = msg.Average + delay + uint32(float64(delay)*randomFactor)
 	}
-	if jitter == 0.0 {
-		msg.Maximum = msg.Average + math.Abs(msg.Average*randomFactor)
-		msg.Minimum = msg.Average - math.Abs(msg.Average*randomFactor)
+	absVal := uint32(math.Abs(float64(msg.Average) * randomFactor))
+	if jitter == 0 {
+		msg.Maximum = msg.Average + absVal
+		if absVal > msg.Average {
+			msg.Minimum = 0
+		} else {
+			msg.Minimum = msg.Average - absVal
+		}
 		msg.Variance = msg.Maximum - msg.Minimum
 	} else {
-		msg.Maximum = msg.Average + 0.5*jitter
-		msg.Minimum = msg.Average - 0.5*jitter
+		halfJitter := uint32(0.5 * float64(jitter))
+		msg.Maximum = msg.Average + halfJitter
+		if halfJitter > msg.Average {
+			msg.Minimum = 0
+		} else {
+			msg.Minimum = msg.Average - halfJitter
+		}
 		msg.Variance = jitter
 	}
 }
@@ -98,9 +111,9 @@ func (processor *DefaultProcessor) processDelayMessage(msg *consumer.DelayMessag
 
 	// Add normalized random factor to the delay
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	randomFactor := (math.Log10(delay+1)*0.2 - 0.1) * 0.05 * (r.Float64()*2 - 1)
+	randomFactor := (math.Log10(float64(delay+1))*0.2 - 0.1) * 0.05 * (r.Float64()*2 - 1)
 	processor.setDelayValues(msg, delay, jitter, randomFactor)
-	processor.log.Debugf("Adjusted delay of node %s of interface %s to: %f", msg.Tags.Source, msg.Tags.InterfaceName, delay)
+	processor.log.Debugf("Adjusted delay of node %s of interface %s to: %d", msg.Tags.Source, msg.Tags.InterfaceName, delay)
 	processor.processedMsgChan <- msg
 }
 

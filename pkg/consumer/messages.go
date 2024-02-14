@@ -22,10 +22,10 @@ type MessageTags struct {
 
 type DelayMessage struct {
 	TelemetryMessage
-	Average  float64 `json:"delay_measurement_session/last_advertisement_information/advertised_values/average,omitempty"`
-	Maximum  float64 `json:"delay_measurement_session/last_advertisement_information/advertised_values/maximum,omitempty"`
-	Minimum  float64 `json:"delay_measurement_session/last_advertisement_information/advertised_values/minimum,omitempty"`
-	Variance float64 `json:"delay_measurement_session/last_advertisement_information/advertised_values/variance,omitempty"`
+	Average  uint32 `json:"delay_measurement_session/last_advertisement_information/advertised_values/average,omitempty"`
+	Maximum  uint32 `json:"delay_measurement_session/last_advertisement_information/advertised_values/maximum,omitempty"`
+	Minimum  uint32 `json:"delay_measurement_session/last_advertisement_information/advertised_values/minimum,omitempty"`
+	Variance uint32 `json:"delay_measurement_session/last_advertisement_information/advertised_values/variance,omitempty"`
 }
 
 type LossMessage struct {
