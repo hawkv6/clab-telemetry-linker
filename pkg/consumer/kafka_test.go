@@ -539,6 +539,34 @@ func TestKafkaConsumer_UnmarshalIsisMessage(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Test Unmarshal Telemetry Message with invalid packet loss message",
+			fields: fields{
+				kafkaBroker:        "localhost:9092",
+				kafkaTopic:         "test",
+				unprocessedMsgChan: make(chan Message),
+			},
+			args: args{
+				message: &sarama.ConsumerMessage{
+					Value: []byte(`{
+						"fields": {
+							"interface_status_and_data/enabled/packet_loss_percentage": "not a number"
+						},
+						"name": "isis",
+						"tags": {
+							"host": "telegraf",
+							"instance_name": "1",
+							"interface_name": "GigabitEthernet0/0/0/0",
+							"path": "Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface",
+							"source": "XR-1",
+							"subscription": "hawk-metrics"
+						},
+						"timestamp": 1704728296
+					}`),
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

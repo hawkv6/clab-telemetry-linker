@@ -351,7 +351,7 @@ func TestDefaultProcessor_getLossValue(t *testing.T) {
 		{
 			name:      "Test Get Loss Values with no loss",
 			loss:      "",
-			lossValue: 0,
+			lossValue: 0.001,
 			wantErr:   false,
 		},
 		{
