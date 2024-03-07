@@ -1,0 +1,23 @@
+project_name: clab-telemetry-linker
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./clab-telemetry-linker/
+    binary: clab-telemetry-linker
+    ldflags:
+      - -s -w -X main.build={{.Version}}
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+nfpms:
+  - maintainer: Severin Dellsperger <severin.dellsperger@ost.ch>
+    description: Enrich telemetry data with the underlying containerlab impairments
+    homepage: https://github.com/hawkv6/clab-telemetry-linker
+    license: Apache 2.0
+    formats:
+      - deb
