@@ -1,3 +1,17 @@
+<h1 align="center">containerlab telemetry linker</h1>
+<p align="center">
+    <br>
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/hawkv6/clab-telemetry-linker?display_name=release&style=flat-square">
+    <img src="https://img.shields.io/github/actions/workflow/status/hawkv6/clab-telemetry-linker/testing.yaml?style=flat-square&label=tests">
+     <img src="https://img.shields.io/codecov/c/github/hawkv6/clab-telemetry-linker?style=flat-square">
+    <img src="https://img.shields.io/github/actions/workflow/status/hawkv6/clab-telemetry-linker/golangci-lint.yaml?style=flat-square&label=checks">
+</p>
+
+<p align="center">
+</p>
+
+---
+
 ## Overview
 ![](docs/images/clab-telemetry-linker-overview.drawio.png)
 
