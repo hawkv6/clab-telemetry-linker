@@ -97,15 +97,32 @@ func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryM
 	return nil, &delayMessage
 }
 
-func (consumer *KafkaConsumer) UnmarshalIsisMessage(telemetryMessage TelemetryMessage) (error, Message) {
-	switch {
-	case telemetryMessage.Fields["interface_status_and_data/enabled/packet_loss_percentage"] != nil:
-		return consumer.UnmarshalLossMessage(telemetryMessage)
-	case telemetryMessage.Fields["interface_status_and_data/enabled/bandwidth"] != nil:
-		return consumer.UnmarshalBandwidthMessage(telemetryMessage)
-	default:
+func (consumer *KafkaConsumer) UnmarshalIsisMessage(telemetryMessage TelemetryMessage) (error, []Message) {
+	var messages []Message
+	var err error
+	var msg Message
+
+	if telemetryMessage.Fields["interface_status_and_data/enabled/packet_loss_percentage"] != nil {
+		err, msg = consumer.UnmarshalLossMessage(telemetryMessage)
+		if err != nil {
+			return err, nil
+		}
+		messages = append(messages, msg)
+	}
+
+	if telemetryMessage.Fields["interface_status_and_data/enabled/bandwidth"] != nil {
+		err, msg = consumer.UnmarshalBandwidthMessage(telemetryMessage)
+		if err != nil {
+			return err, nil
+		}
+		messages = append(messages, msg)
+	}
+
+	if len(messages) == 0 {
 		return fmt.Errorf("Received unknown ISIS message: %v", telemetryMessage), nil
 	}
+
+	return nil, messages
 }
 
 func (consumer *KafkaConsumer) UnmarshalLossMessage(telemetryMessage TelemetryMessage) (error, *LossMessage) {
@@ -140,11 +157,13 @@ func (consumer *KafkaConsumer) processMessage(message *sarama.ConsumerMessage) {
 		}
 		consumer.unprocessedMsgChan <- delayMessage
 	} else if telemetryMessage.Name == "isis" {
-		err, isisMessage := consumer.UnmarshalIsisMessage(*telemetryMessage)
+		err, isisMessages := consumer.UnmarshalIsisMessage(*telemetryMessage)
 		if err != nil {
 			return
 		}
-		consumer.unprocessedMsgChan <- isisMessage
+		for _, isisMessage := range isisMessages {
+			consumer.unprocessedMsgChan <- isisMessage
+		}
 	} else {
 		consumer.log.Debugf("Skipping unknown message: %v", telemetryMessage)
 		return

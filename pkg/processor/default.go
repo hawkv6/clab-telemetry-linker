@@ -126,7 +126,7 @@ func (processor *DefaultProcessor) getLossValue(impairmentsPrefix string) (error
 			return nil, lossValue
 		}
 	}
-	return nil, 0.0
+	return nil, 0.001
 }
 
 func (processor *DefaultProcessor) setLossValue(msg *consumer.LossMessage, loss float64, randomFactor float64) {

@@ -23,5 +23,5 @@ go.work
 #VSCode
 .vscode
 
-# Built binary
-clab-telemetry-linker
+# Binaries
+bin
