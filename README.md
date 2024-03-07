@@ -1,5 +1,5 @@
 ## Overview
-![](images/clab-telemetry-linker-overview.drawio.png)
+![](docs/images/clab-telemetry-linker-overview.drawio.png)
 
 The Cisco IOS-XRd devices deployed with containeralb transmit telemetry data (Cisco MDT / YANG PUSH) to Telegraf Ingress. The messages are then converted into JSON format and forwarded to Kafka, where they become available in the receiver topic for the clab-telemetry-linker. The data is then processed with the applied impairment values.
 After processing, the data is converted into Influx Line Protocol and sent to Kafka Publisher Topic. From there, each message is taken by Telegraf Egress and added to the InfluxDB.
@@ -32,6 +32,7 @@ INFO[2024-01-21T11:31:19Z] Start all services                            subsyst
 INFO[2024-01-21T11:31:19Z] Start consuming messages from broker 172.16.19.77:9094 and topic hawkv6.telemetry.unprocessed  subsystem=consumer
 INFO[2024-01-21T11:31:19Z] Starting processing messages                  subsystem=processor
 INFO[2024-01-21T11:31:19Z] Starting publishing messages to broker 172.16.19.77:9094 and topic hawkv6.telemetry.processed  subsystem=publisher
+
 ^CINFO[2024-01-21T11:31:24Z] Received interrupt signal, shutting down      subsystem=cmd
 INFO[2024-01-21T11:31:24Z] Stopping all services                         subsystem=service
 INFO[2024-01-21T11:31:24Z] Stop consumer with values:  172.16.19.77:9094 hawkv6.telemetry.unprocessed  subsystem=consumer
@@ -131,3 +132,4 @@ sensor-group delay
  !
 ```
 - Detailed network configs can be found in https://github.com/hawkv6/network/tree/hawk9-clab-testnetwork/config
+- Example telemetry messages can be found in the `examples` folder
