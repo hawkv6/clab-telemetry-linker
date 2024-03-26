@@ -21,19 +21,24 @@ type DefaultSetCommand struct {
 	resetCommand *exec.Cmd
 }
 
+func createBaseCommand(node, interface_, clabName string) *exec.Cmd {
+	command := exec.Command("containerlab")
+	command.Args = append(command.Args, "tools", "netem", "set")
+	clabNode := clabName + "-" + node
+	command.Args = append(command.Args, "-n", clabNode)
+	command.Args = append(command.Args, "-i", interface_)
+	return command
+}
+
 func NewDefaultSetCommand(node, interface_, clabName string) *DefaultSetCommand {
 	command := &DefaultSetCommand{
 		BaseCommand: BaseCommand{
 			log:         logging.DefaultLogger.WithField("subsystem", subsystem),
-			execCommand: exec.Command("containerlab"),
+			execCommand: createBaseCommand(node, interface_, clabName),
 		},
 	}
-	command.execCommand.Args = append(command.execCommand.Args, "tools", "netem", "set")
-	clabNode := clabName + "-" + node
-	command.execCommand.Args = append(command.execCommand.Args, "-n", clabNode)
-	command.execCommand.Args = append(command.execCommand.Args, "-i", interface_)
 	command.log.Debugln("Create basic command: ", command.execCommand)
-	command.resetCommand = command.execCommand
+	command.resetCommand = createBaseCommand(node, interface_, clabName)
 	return command
 }
 
