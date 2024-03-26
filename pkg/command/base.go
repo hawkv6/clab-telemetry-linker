@@ -33,6 +33,6 @@ func (command *BaseCommand) ExecuteCommand(cmd *exec.Cmd) error {
 			return fmt.Errorf("Aborting... Following Error happened: %v", err)
 		}
 	}
-	command.log.Debugln("Result: ", out.String())
+	fmt.Printf("%s\n", out.String())
 	return nil
 }
