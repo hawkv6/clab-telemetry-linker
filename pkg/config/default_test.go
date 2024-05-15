@@ -34,12 +34,12 @@ func TestDefaultConfig_setUserHome(t *testing.T) {
 			helper := helpers.NewMockHelper(ctrl)
 			config := &DefaultConfig{helper: helper}
 			if !tt.wantError {
-				helper.EXPECT().GetUserHome().Return(nil, tt.want)
+				helper.EXPECT().GetUserHome().Return(tt.want, nil)
 				assert.NoError(t, config.setUserHome())
 				assert.Equal(t, tt.want, config.userHome)
 			}
 			if tt.wantError {
-				helper.EXPECT().GetUserHome().Return(errors.New("artificial error"), "")
+				helper.EXPECT().GetUserHome().Return("", errors.New("artificial error"))
 				assert.Error(t, config.setUserHome())
 			}
 		})
@@ -225,7 +225,7 @@ func TestDefaultConfig_doesConfigExists(t *testing.T) {
 				log:              logging.DefaultLogger.WithField("subsystem", "config_test"),
 				fullfileLocation: tt.fields.fullfileLocation,
 			}
-			err, exists := config.doesConfigExist()
+			exists, err := config.doesConfigExist()
 			if tt.wantError {
 				assert.Error(t, err)
 			} else {
@@ -590,15 +590,15 @@ func TestDefaultConfig_createDefaultConfig(t *testing.T) {
 			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey).AnyTimes()
 			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName).AnyTimes()
 			if tt.want.userHome == "" {
-				helper.EXPECT().GetUserHome().Return(errors.New("artificial error"), "")
+				helper.EXPECT().GetUserHome().Return("", errors.New("artificial error"))
 			} else {
-				helper.EXPECT().GetUserHome().Return(nil, tt.want.userHome)
+				helper.EXPECT().GetUserHome().Return(tt.want.userHome, nil)
 			}
 			if tt.wantError {
-				err, _ := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+				_, err := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
 				assert.Error(t, err)
 			} else {
-				err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+				defaultConfig, err := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
 				assert.NoError(t, err)
 				assert.NotNil(t, defaultConfig)
 				assert.Equal(t, tt.want.userHome, defaultConfig.userHome)
@@ -623,7 +623,7 @@ func TestDefaultConfig_NewDefaultConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err, config := NewDefaultConfig()
+			config, err := NewDefaultConfig()
 			if tt.wantError {
 				assert.Error(t, err)
 				assert.Nil(t, config)
@@ -657,9 +657,9 @@ func TestDefaultConfig_WatchConfigChange(t *testing.T) {
 			helper := helpers.NewMockHelper(ctrl)
 			helper.EXPECT().GetDefaultClabNameKey().Return(tt.want.clabNameKey).AnyTimes()
 			helper.EXPECT().GetDefaultClabName().Return(tt.want.clabName).AnyTimes()
-			helper.EXPECT().GetUserHome().Return(nil, tt.want.userHome)
+			helper.EXPECT().GetUserHome().Return(tt.want.userHome, nil)
 
-			err, defaultConfig := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
+			defaultConfig, err := CreateDefaultConfig(tt.want.fileName, tt.want.clabName, tt.want.clabNameKey, helper)
 			assert.NoError(t, err)
 			err = defaultConfig.WatchConfigChange()
 			assert.NoError(t, os.WriteFile(defaultConfig.fullfileLocation, []byte("clab-name: new-name"), 0644))

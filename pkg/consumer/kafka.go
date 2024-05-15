@@ -68,17 +68,17 @@ func (consumer *KafkaConsumer) Init() error {
 	return nil
 }
 
-func (consumer *KafkaConsumer) UnmarshalTelemetryMessage(message *sarama.ConsumerMessage) (error, *TelemetryMessage) {
+func (consumer *KafkaConsumer) UnmarshalTelemetryMessage(message *sarama.ConsumerMessage) (*TelemetryMessage, error) {
 	consumer.log.Debugln("Received JSON message: ", string(message.Value))
 	var telemetryMessage TelemetryMessage
 	if err := json.Unmarshal([]byte(message.Value), &telemetryMessage); err != nil {
 		consumer.log.Debugln("Error unmarshalling message: ", err)
-		return err, nil
+		return nil, err
 	}
-	return nil, &telemetryMessage
+	return &telemetryMessage, nil
 }
 
-func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryMessage) (error, *DelayMessage) {
+func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryMessage) (*DelayMessage, error) {
 	delayMessage := DelayMessage{TelemetryMessage: telemetryMessage}
 
 	fields := map[string]*uint32{
@@ -90,74 +90,74 @@ func (consumer *KafkaConsumer) UnmarshalDelayMessage(telemetryMessage TelemetryM
 	for key, field := range fields {
 		value, ok := telemetryMessage.Fields[key].(float64)
 		if !ok {
-			return fmt.Errorf("unable to convert %s to float64", key), nil
+			return nil, fmt.Errorf("unable to convert %s to float64", key)
 		}
 		*field = uint32(value)
 	}
-	return nil, &delayMessage
+	return &delayMessage, nil
 }
 
-func (consumer *KafkaConsumer) UnmarshalIsisMessage(telemetryMessage TelemetryMessage) (error, []Message) {
+func (consumer *KafkaConsumer) UnmarshalIsisMessage(telemetryMessage TelemetryMessage) ([]Message, error) {
 	var messages []Message
 	var err error
 	var msg Message
 
 	if telemetryMessage.Fields["interface_status_and_data/enabled/packet_loss_percentage"] != nil {
-		err, msg = consumer.UnmarshalLossMessage(telemetryMessage)
+		msg, err = consumer.UnmarshalLossMessage(telemetryMessage)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 		messages = append(messages, msg)
 	}
 
 	if telemetryMessage.Fields["interface_status_and_data/enabled/bandwidth"] != nil {
-		err, msg = consumer.UnmarshalBandwidthMessage(telemetryMessage)
+		msg, err = consumer.UnmarshalBandwidthMessage(telemetryMessage)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 		messages = append(messages, msg)
 	}
 
 	if len(messages) == 0 {
-		return fmt.Errorf("Received unknown ISIS message: %v", telemetryMessage), nil
+		return nil, fmt.Errorf("Received unknown ISIS message: %v", telemetryMessage)
 	}
 
-	return nil, messages
+	return messages, nil
 }
 
-func (consumer *KafkaConsumer) UnmarshalLossMessage(telemetryMessage TelemetryMessage) (error, *LossMessage) {
+func (consumer *KafkaConsumer) UnmarshalLossMessage(telemetryMessage TelemetryMessage) (*LossMessage, error) {
 	lossMessage := LossMessage{TelemetryMessage: telemetryMessage}
 	value, ok := telemetryMessage.Fields["interface_status_and_data/enabled/packet_loss_percentage"].(float64)
 	if !ok {
-		return fmt.Errorf("unable to convert packet_loss_percentage to float"), nil
+		return nil, fmt.Errorf("unable to convert packet_loss_percentage to float")
 	}
 	lossMessage.LossPercentage = value
-	return nil, &lossMessage
+	return &lossMessage, nil
 }
 
-func (consumer *KafkaConsumer) UnmarshalBandwidthMessage(telemetryMessage TelemetryMessage) (error, *BandwidthMessage) {
+func (consumer *KafkaConsumer) UnmarshalBandwidthMessage(telemetryMessage TelemetryMessage) (*BandwidthMessage, error) {
 	bandwidthMessage := BandwidthMessage{TelemetryMessage: telemetryMessage}
 	value, ok := telemetryMessage.Fields["interface_status_and_data/enabled/bandwidth"].(float64)
 	if !ok {
-		return fmt.Errorf("unable to convert bandwidth to float64"), nil
+		return nil, fmt.Errorf("unable to convert bandwidth to float64")
 	}
 	bandwidthMessage.Bandwidth = value
-	return nil, &bandwidthMessage
+	return &bandwidthMessage, nil
 }
 
 func (consumer *KafkaConsumer) processMessage(message *sarama.ConsumerMessage) {
-	err, telemetryMessage := consumer.UnmarshalTelemetryMessage(message)
+	telemetryMessage, err := consumer.UnmarshalTelemetryMessage(message)
 	if err != nil {
 		return
 	}
 	if telemetryMessage.Name == "performance-measurement" {
-		err, delayMessage := consumer.UnmarshalDelayMessage(*telemetryMessage)
+		delayMessage, err := consumer.UnmarshalDelayMessage(*telemetryMessage)
 		if err != nil {
 			return
 		}
 		consumer.unprocessedMsgChan <- delayMessage
 	} else if telemetryMessage.Name == "isis" {
-		err, isisMessages := consumer.UnmarshalIsisMessage(*telemetryMessage)
+		isisMessages, err := consumer.UnmarshalIsisMessage(*telemetryMessage)
 		if err != nil {
 			return
 		}

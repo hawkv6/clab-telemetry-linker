@@ -35,22 +35,22 @@ func NewDefaultProcessor(config config.Config, unprocessedMsgChan chan consumer.
 	}
 }
 
-func (processor *DefaultProcessor) shortenInterfaceName(name string) (error, string) {
+func (processor *DefaultProcessor) shortenInterfaceName(name string) (string, error) {
 	re := regexp.MustCompile(`GigabitEthernet(\d+)/(\d+)/(\d+)/(\d+)`)
 	if !re.MatchString(name) {
-		return fmt.Errorf("interface name %s does not match expected pattern", name), ""
+		return "", fmt.Errorf("interface name %s does not match expected pattern", name)
 	}
-	return nil, re.ReplaceAllString(name, "Gi$1-$2-$3-$4")
+	return re.ReplaceAllString(name, "Gi$1-$2-$3-$4"), nil
 }
 
-func (processor *DefaultProcessor) getDelayValues(impairmentsPrefix string) (error, uint32, uint32) {
+func (processor *DefaultProcessor) getDelayValues(impairmentsPrefix string) (uint32, uint32, error) {
 	delay := processor.config.GetValue(impairmentsPrefix + "delay")
 	var delayMicroSec uint32 = 0
 	var jitterMicroSec uint32 = 0
 	if delay != "" {
 		delayValue64, err := strconv.ParseUint(delay, 10, 32)
 		if err != nil {
-			return fmt.Errorf("Failed to convert delay to uint64: %v", err), 0, 0
+			return 0, 0, fmt.Errorf("Failed to convert delay to uint64: %v", err)
 		}
 		delayValue := uint32(delayValue64)
 		delayMicroSec = delayValue * 1000
@@ -59,13 +59,13 @@ func (processor *DefaultProcessor) getDelayValues(impairmentsPrefix string) (err
 		if jitter != "" {
 			jitterValue64, err := strconv.ParseUint(jitter, 10, 32)
 			if err != nil {
-				return fmt.Errorf("Failed to convert jitter to float64: %v", err), 0, 0
+				return 0, 0, fmt.Errorf("Failed to convert jitter to float64: %v", err)
 			}
 			jitterValue := uint32(jitterValue64)
 			jitterMicroSec = jitterValue * 1000
 		}
 	}
-	return nil, delayMicroSec, jitterMicroSec
+	return delayMicroSec, jitterMicroSec, nil
 }
 
 func (processor *DefaultProcessor) setDelayValues(msg *consumer.DelayMessage, delay uint32, jitter uint32, randomFactor float64) {
@@ -97,13 +97,13 @@ func (processor *DefaultProcessor) setDelayValues(msg *consumer.DelayMessage, de
 
 func (processor *DefaultProcessor) processDelayMessage(msg *consumer.DelayMessage) {
 	processor.log.Debugf("Process delay of node %s of interface %s", msg.Tags.Source, msg.Tags.InterfaceName)
-	err, shortInterfaceName := processor.shortenInterfaceName(msg.Tags.InterfaceName)
+	shortInterfaceName, err := processor.shortenInterfaceName(msg.Tags.InterfaceName)
 	if err != nil {
 		processor.log.Debugf("Failed to shorten interface name: %v", err)
 		return
 	}
 	impairmentsPrefix := processor.helper.GetDefaultImpairmentsPrefix(msg.Tags.Source, shortInterfaceName)
-	err, delay, jitter := processor.getDelayValues(impairmentsPrefix)
+	delay, jitter, err := processor.getDelayValues(impairmentsPrefix)
 	if err != nil {
 		processor.log.Errorf("Failed to get delay values: %v", err)
 		return
@@ -117,16 +117,16 @@ func (processor *DefaultProcessor) processDelayMessage(msg *consumer.DelayMessag
 	processor.processedMsgChan <- msg
 }
 
-func (processor *DefaultProcessor) getLossValue(impairmentsPrefix string) (error, float64) {
+func (processor *DefaultProcessor) getLossValue(impairmentsPrefix string) (float64, error) {
 	loss := processor.config.GetValue(impairmentsPrefix + "loss")
 	if loss != "" {
 		if lossValue, err := strconv.ParseFloat(loss, 64); err != nil {
-			return fmt.Errorf("Failed to convert loss to float64: %v", err), 0
+			return 0, fmt.Errorf("Failed to convert loss to float64: %v", err)
 		} else {
-			return nil, lossValue
+			return lossValue, nil
 		}
 	}
-	return nil, 0.001
+	return 0.001, nil
 }
 
 func (processor *DefaultProcessor) setLossValue(msg *consumer.LossMessage, loss float64, randomFactor float64) {
@@ -134,12 +134,12 @@ func (processor *DefaultProcessor) setLossValue(msg *consumer.LossMessage, loss 
 }
 func (processor *DefaultProcessor) processLossMessage(msg *consumer.LossMessage) {
 	processor.log.Debugf("Process loss of node %s of interface %s", msg.Tags.Source, msg.Tags.InterfaceName)
-	err, shortInterfaceName := processor.shortenInterfaceName(msg.Tags.InterfaceName)
+	shortInterfaceName, err := processor.shortenInterfaceName(msg.Tags.InterfaceName)
 	if err != nil {
 		processor.log.Debugf("Failed to shorten interface name: %v", err)
 		return
 	}
-	err, loss := processor.getLossValue(processor.helper.GetDefaultImpairmentsPrefix(msg.Tags.Source, shortInterfaceName))
+	loss, err := processor.getLossValue(processor.helper.GetDefaultImpairmentsPrefix(msg.Tags.Source, shortInterfaceName))
 	if err != nil {
 		processor.log.Errorf("Failed to get loss value: %v", err)
 		return
@@ -154,25 +154,25 @@ func (processor *DefaultProcessor) processLossMessage(msg *consumer.LossMessage)
 	processor.processedMsgChan <- msg
 }
 
-func (proessor *DefaultProcessor) getBandwidthValue(impairmentsPrefix string) (error, float64) {
+func (proessor *DefaultProcessor) getBandwidthValue(impairmentsPrefix string) (float64, error) {
 	bandwidth := proessor.config.GetValue(impairmentsPrefix + "rate")
 	if bandwidth != "" {
 		if bandwidthValue, err := strconv.ParseFloat(bandwidth, 64); err != nil {
-			return fmt.Errorf("Failed to convert bandwidth to float64: %v", err), 0
+			return 0, fmt.Errorf("Failed to convert bandwidth to float64: %v", err)
 		} else {
-			return nil, bandwidthValue
+			return bandwidthValue, nil
 		}
 	}
-	return nil, 1000000 // 1Gbps
+	return 1000000, nil // 1Gbps
 }
 func (processor *DefaultProcessor) processBandwidthMessage(msg *consumer.BandwidthMessage) {
 	processor.log.Debugf("Process bandwidth of node %s of interface %s", msg.Tags.Source, msg.Tags.InterfaceName)
-	err, shortInterfaceName := processor.shortenInterfaceName(msg.Tags.InterfaceName)
+	shortInterfaceName, err := processor.shortenInterfaceName(msg.Tags.InterfaceName)
 	if err != nil {
 		processor.log.Debugf("Failed to shorten interface name: %v", err)
 		return
 	}
-	err, bandwidth := processor.getBandwidthValue(processor.helper.GetDefaultImpairmentsPrefix(msg.Tags.Source, shortInterfaceName))
+	bandwidth, err := processor.getBandwidthValue(processor.helper.GetDefaultImpairmentsPrefix(msg.Tags.Source, shortInterfaceName))
 	if err != nil {
 		processor.log.Errorf("Failed to get bandwidth value: %v", err)
 		return

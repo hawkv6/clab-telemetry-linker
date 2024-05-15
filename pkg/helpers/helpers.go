@@ -8,7 +8,7 @@ import (
 
 type Helper interface {
 	IsRoot() bool
-	GetUserHome() (error, string)
+	GetUserHome() (string, error)
 	GetDefaultClabNameKey() string
 	GetDefaultClabName() string
 	GetDefaultImpairmentsPrefix(node, interface_ string) string
@@ -24,13 +24,13 @@ func (helper *DefaultHelper) IsRoot() bool {
 	return os.Geteuid() == 0
 }
 
-func (helper *DefaultHelper) GetUserHome() (error, string) {
+func (helper *DefaultHelper) GetUserHome() (string, error) {
 	username := os.Getenv("SUDO_USER")
 	user, err := user.Lookup(username)
 	if err != nil {
-		return fmt.Errorf("Unable to find userhome for user %q: %v", username, err), ""
+		return "", fmt.Errorf("Unable to find userhome for user %q: %v", username, err)
 	}
-	return nil, user.HomeDir
+	return user.HomeDir, nil
 }
 
 func (helper *DefaultHelper) GetDefaultClabNameKey() string {

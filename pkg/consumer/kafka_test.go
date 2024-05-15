@@ -300,7 +300,7 @@ func TestKafkaConsumer_UnmarshalTelemetryMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
-			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
+			telemetryMsg, err := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -420,9 +420,9 @@ func TestKafkaConsumer_UnmarshalDelayMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
-			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
+			telemetryMsg, err := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, delayMsg := kafkaConsumer.UnmarshalDelayMessage(*telemetryMsg)
+			delayMsg, err := kafkaConsumer.UnmarshalDelayMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -571,9 +571,9 @@ func TestKafkaConsumer_UnmarshalIsisMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
-			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
+			telemetryMsg, err := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, delayMsg := kafkaConsumer.UnmarshalIsisMessage(*telemetryMsg)
+			delayMsg, err := kafkaConsumer.UnmarshalIsisMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -658,9 +658,9 @@ func TestKafkaConsumer_UnmarshalLossMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
-			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
+			telemetryMsg, err := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, isisMsg := kafkaConsumer.UnmarshalLossMessage(*telemetryMsg)
+			isisMsg, err := kafkaConsumer.UnmarshalLossMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -746,9 +746,9 @@ func TestKafkaConsumer_UnmarshalBandwidthMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kafkaConsumer := NewKafkaConsumer(tt.fields.kafkaBroker, tt.fields.kafkaTopic, tt.fields.unprocessedMsgChan)
-			err, telemetryMsg := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
+			telemetryMsg, err := kafkaConsumer.UnmarshalTelemetryMessage(tt.args.message)
 			assert.NoError(t, err)
-			err, bwMsg := kafkaConsumer.UnmarshalBandwidthMessage(*telemetryMsg)
+			bwMsg, err := kafkaConsumer.UnmarshalBandwidthMessage(*telemetryMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

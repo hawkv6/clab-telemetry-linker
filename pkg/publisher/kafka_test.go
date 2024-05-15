@@ -192,7 +192,7 @@ func TestKafkaPublisher_encodeDelayMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			publisher := NewKafkaPublisher(tt.fields.kafkaBroker, tt.fields.kafkaTopic, make(chan consumer.Message))
-			err, byteMsg := publisher.encodeDelayMessage(tt.args.msg)
+			byteMsg, err := publisher.encodeDelayMessage(tt.args.msg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -257,7 +257,7 @@ func TestKafkaPublisher_encodeLossMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			publisher := NewKafkaPublisher(tt.fields.kafkaBroker, tt.fields.kafkaTopic, make(chan consumer.Message))
-			err, byteMsg := publisher.encodeLossMessage(tt.args.msg)
+			byteMsg, err := publisher.encodeLossMessage(tt.args.msg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -322,7 +322,7 @@ func TestKafkaPublisher_encodeBandwidthMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			publisher := NewKafkaPublisher(tt.fields.kafkaBroker, tt.fields.kafkaTopic, make(chan consumer.Message))
-			err, byteMsg := publisher.encodeBandwidthMessage(tt.args.msg)
+			byteMsg, err := publisher.encodeBandwidthMessage(tt.args.msg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -445,7 +445,7 @@ func TestKafkaPublisher_encodeMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			publisher := NewKafkaPublisher(tt.fields.kafkaBroker, tt.fields.kafkaTopic, make(chan consumer.Message))
-			err, byteMsg := publisher.encodeMessage(tt.args.msg)
+			byteMsg, err := publisher.encodeMessage(tt.args.msg)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

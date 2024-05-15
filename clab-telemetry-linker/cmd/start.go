@@ -23,7 +23,7 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start processing the telemetry data",
 	Run: func(cmd *cobra.Command, args []string) {
-		err, defaultConfig := config.NewDefaultConfig()
+		defaultConfig, err := config.NewDefaultConfig()
 		if err != nil {
 			log.Fatalf("Error creating config: %v\n", err)
 		}

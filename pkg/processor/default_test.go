@@ -67,7 +67,7 @@ func TestDefaultProcessor_shortenInterfaceName(t *testing.T) {
 			processedMsgChan := make(chan consumer.Message)
 			helper := helpers.NewMockHelper(ctrl)
 			processor := NewDefaultProcessor(config, unprocessedMsgChan, processedMsgChan, helper)
-			err, got := processor.shortenInterfaceName(tt.args.name)
+			got, err := processor.shortenInterfaceName(tt.args.name)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -135,7 +135,7 @@ func TestDefaultProcessor_getDelayValues(t *testing.T) {
 			impairmentsPrefix := helper.GetDefaultImpairmentsPrefix("XR-1", "Gi0-0-0-0")
 			config.EXPECT().GetValue(impairmentsPrefix + "delay").Return(tt.delay)
 			config.EXPECT().GetValue(impairmentsPrefix + "jitter").Return(tt.jitter).AnyTimes()
-			err, delay, jitter := processor.getDelayValues(impairmentsPrefix)
+			delay, jitter, err := processor.getDelayValues(impairmentsPrefix)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Equal(t, uint32(0), delay)
@@ -371,7 +371,7 @@ func TestDefaultProcessor_getLossValue(t *testing.T) {
 			helper.EXPECT().GetDefaultImpairmentsPrefix("XR-1", "Gi0-0-0-0").Return("nodes.XR-1.config.Gi0-0-0-0.impairments.")
 			impairmentsPrefix := helper.GetDefaultImpairmentsPrefix("XR-1", "Gi0-0-0-0")
 			config.EXPECT().GetValue(impairmentsPrefix + "loss").Return(tt.loss)
-			err, loss := processor.getLossValue(impairmentsPrefix)
+			loss, err := processor.getLossValue(impairmentsPrefix)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Equal(t, 0.0, loss)
@@ -564,7 +564,7 @@ func TestDefaultProcessor_getBandwidthValue(t *testing.T) {
 			helper.EXPECT().GetDefaultImpairmentsPrefix("XR-1", "Gi0-0-0-0").Return("nodes.XR-1.config.Gi0-0-0-0.impairments.")
 			impairmentsPrefix := helper.GetDefaultImpairmentsPrefix("XR-1", "Gi0-0-0-0")
 			config.EXPECT().GetValue(impairmentsPrefix + "rate").Return(tt.rate)
-			err, rate := processor.getBandwidthValue(impairmentsPrefix)
+			rate, err := processor.getBandwidthValue(impairmentsPrefix)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

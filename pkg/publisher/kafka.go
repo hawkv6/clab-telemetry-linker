@@ -58,7 +58,7 @@ func (publisher *KafkaPublisher) encodeTags(enc *lineprotocol.Encoder, tags cons
 	enc.AddTag("subscription", tags.Subscription)
 }
 
-func (publisher *KafkaPublisher) encodeDelayMessage(msg consumer.DelayMessage) (error, []byte) {
+func (publisher *KafkaPublisher) encodeDelayMessage(msg consumer.DelayMessage) ([]byte, error) {
 	enc := publisher.createEncoder(msg.TelemetryMessage)
 	publisher.encodeTags(&enc, msg.Tags)
 	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/average", lineprotocol.MustNewValue(float64(msg.Average)))
@@ -67,34 +67,34 @@ func (publisher *KafkaPublisher) encodeDelayMessage(msg consumer.DelayMessage) (
 	enc.AddField("delay_measurement_session/last_advertisement_information/advertised_values/variance", lineprotocol.MustNewValue(float64(msg.Variance)))
 	enc.EndLine(time.Unix(msg.Timestamp, 0))
 	if err := enc.Err(); err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, enc.Bytes()
+	return enc.Bytes(), nil
 }
 
-func (publisher *KafkaPublisher) encodeLossMessage(msg consumer.LossMessage) (error, []byte) {
+func (publisher *KafkaPublisher) encodeLossMessage(msg consumer.LossMessage) ([]byte, error) {
 	enc := publisher.createEncoder(msg.TelemetryMessage)
 	publisher.encodeTags(&enc, msg.Tags)
 	enc.AddField("interface_status_and_data/enabled/packet_loss_percentage", lineprotocol.MustNewValue(msg.LossPercentage))
 	enc.EndLine(time.Unix(msg.Timestamp, 0))
 	if err := enc.Err(); err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, enc.Bytes()
+	return enc.Bytes(), nil
 }
 
-func (publisher *KafkaPublisher) encodeBandwidthMessage(msg consumer.BandwidthMessage) (error, []byte) {
+func (publisher *KafkaPublisher) encodeBandwidthMessage(msg consumer.BandwidthMessage) ([]byte, error) {
 	enc := publisher.createEncoder(msg.TelemetryMessage)
 	publisher.encodeTags(&enc, msg.Tags)
 	enc.AddField("interface_status_and_data/enabled/bandwidth", lineprotocol.MustNewValue(msg.Bandwidth))
 	enc.EndLine(time.Unix(msg.Timestamp, 0))
 	if err := enc.Err(); err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, enc.Bytes()
+	return enc.Bytes(), nil
 }
 
-func (publisher *KafkaPublisher) encodeMessage(msg consumer.Message) (error, []byte) {
+func (publisher *KafkaPublisher) encodeMessage(msg consumer.Message) ([]byte, error) {
 	switch msg := msg.(type) {
 	case *consumer.DelayMessage:
 		return publisher.encodeDelayMessage(*msg)
@@ -103,11 +103,11 @@ func (publisher *KafkaPublisher) encodeMessage(msg consumer.Message) (error, []b
 	case *consumer.BandwidthMessage:
 		return publisher.encodeBandwidthMessage(*msg)
 	default:
-		return fmt.Errorf("Skipping unknown message type: %v", msg), nil
+		return nil, fmt.Errorf("Skipping unknown message type: %v", msg)
 	}
 }
 func (publisher *KafkaPublisher) publishMessage(msg consumer.Message) {
-	err, encodedMsg := publisher.encodeMessage(msg)
+	encodedMsg, err := publisher.encodeMessage(msg)
 	if err != nil {
 		publisher.log.Errorln("Error encoding message: ", err)
 		return

@@ -22,7 +22,7 @@ var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set impairments on a containerlab interface",
 	Run: func(cmd *cobra.Command, args []string) {
-		err, defaultConfig := config.NewDefaultConfig()
+		defaultConfig, err := config.NewDefaultConfig()
 		if err != nil {
 			log.Fatalf("Error reading/creating config: %v\n", err)
 		}

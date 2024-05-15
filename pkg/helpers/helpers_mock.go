@@ -81,11 +81,11 @@ func (mr *MockHelperMockRecorder) GetDefaultImpairmentsPrefix(node, interface_ a
 }
 
 // GetUserHome mocks base method.
-func (m *MockHelper) GetUserHome() (error, string) {
+func (m *MockHelper) GetUserHome() (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserHome")
-	ret0, _ := ret[0].(error)
-	ret1, _ := ret[1].(string)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 

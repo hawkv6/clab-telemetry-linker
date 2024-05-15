@@ -29,7 +29,7 @@ type DefaultConfig struct {
 }
 
 func (config *DefaultConfig) setUserHome() error {
-	if err, userHome := config.helper.GetUserHome(); err != nil {
+	if userHome, err := config.helper.GetUserHome(); err != nil {
 		return err
 	} else {
 		config.userHome = userHome
@@ -73,15 +73,15 @@ func (config *DefaultConfig) setClabName(clabName string) error {
 	return nil
 }
 
-func (config *DefaultConfig) doesConfigExist() (error, bool) {
+func (config *DefaultConfig) doesConfigExist() (bool, error) {
 	config.log.Debugln("Check if config file exists:", config.fullfileLocation)
 	if _, err := os.Stat(config.fullfileLocation); err != nil {
 		if os.IsNotExist(err) {
-			return nil, false
+			return false, nil
 		}
-		return fmt.Errorf("Unable to check if config file exists: %v", err), false
+		return false, fmt.Errorf("Unable to check if config file exists: %v", err)
 	}
-	return nil, true
+	return true, nil
 }
 
 func (config *DefaultConfig) createConfig() error {
@@ -108,7 +108,7 @@ func (config *DefaultConfig) readConfig() error {
 }
 
 func (config *DefaultConfig) InitConfig() error {
-	err, exist := config.doesConfigExist()
+	exist, err := config.doesConfigExist()
 	if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (config *DefaultConfig) WriteConfig() error {
 	return nil
 }
 
-func CreateDefaultConfig(configFileName, clabName, clabNameKey string, helper helpers.Helper) (error, *DefaultConfig) {
+func CreateDefaultConfig(configFileName, clabName, clabNameKey string, helper helpers.Helper) (*DefaultConfig, error) {
 	defaultConfig := &DefaultConfig{
 		log:           logging.DefaultLogger.WithField("subsystem", Subsystem),
 		koanfInstance: koanf.New("."),
@@ -182,24 +182,24 @@ func CreateDefaultConfig(configFileName, clabName, clabNameKey string, helper he
 		helper:        helper,
 	}
 	if err := defaultConfig.setUserHome(); err != nil {
-		return err, nil
+		return nil, err
 	}
 	defaultConfig.setConfigFileName(configFileName)
 	defaultConfig.setConfigPath()
 	defaultConfig.setConfigFileLocation()
 	if err := defaultConfig.setClabName(clabName); err != nil {
-		return err, nil
+		return nil, err
 	}
 	if err := defaultConfig.InitConfig(); err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, defaultConfig
+	return defaultConfig, nil
 }
 
-func NewDefaultConfig() (error, *DefaultConfig) {
-	err, defaultConfig := CreateDefaultConfig("", "", "", helpers.NewDefaultHelper())
+func NewDefaultConfig() (*DefaultConfig, error) {
+	defaultConfig, err := CreateDefaultConfig("", "", "", helpers.NewDefaultHelper())
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, defaultConfig
+	return defaultConfig, nil
 }

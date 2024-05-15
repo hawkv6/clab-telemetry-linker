@@ -10,14 +10,11 @@ import (
 
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show impairments on a containerlab interface",
+	Short: "Show impairments on a containerlab node",
 	Run: func(cmd *cobra.Command, args []string) {
-		err, defaultConfig := config.NewDefaultConfig()
+		defaultConfig, err := config.NewDefaultConfig()
 		if err != nil {
 			log.Fatalf("Error reading/creating config: %v\n", err)
-		}
-		if defaultConfig.GetValue("nodes."+Node) == "" {
-			log.Fatalf("Node %s not found in config\n", Node)
 		}
 		helper := helpers.NewDefaultHelper()
 		command := command.NewDefaultShowCommand(Node, defaultConfig.GetValue(helper.GetDefaultClabNameKey()))
