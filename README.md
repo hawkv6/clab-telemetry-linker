@@ -14,9 +14,13 @@
 ---
 
 ## Overview
+The clab-telemetry-linker service was developed to solve the missing performance measurement support issue in virtual XRd routers, leading to streaming telemetry messages with empty or fixed values. This service allows for the simulation of network impairments like delay, jitter, packet loss, and bandwidth limitations within a containerlab network. By utilizing the containerlab interface, the clab-telemetry-linker can adjust these impairments in the virtual network and populate the streaming telemetry with these values, plus or minus a random value. It can be used with [Jalapeno](https://github.com/cisco-open/jalapeno) or another similar tech stack using Telegraf, Kafka, and InfluxDB.
+
 ![](docs/images/clab-telemetry-linker-overview.drawio.png)
 
-The Cisco IOS-XRd devices deployed with containeralb transmit telemetry data (Cisco MDT / YANG PUSH) to Telegraf Ingress. The messages are then converted into JSON format and forwarded to Kafka, where they become available in the receiver topic for the clab-telemetry-linker. The data is then processed with the applied impairment values.
+### Functionality
+
+The Cisco IOS-XRd devices deployed with containerlab transmit telemetry data (Cisco MDT / YANG PUSH) with empty/static values to Telegraf Ingress. The messages are then converted into JSON format and forwarded to Kafka, where they become available in the receiver topic for the clab-telemetry-linker. The data is then processed with the applied impairment values.
 After processing, the data is converted into Influx Line Protocol and sent to Kafka Publisher Topic. From there, each message is taken by Telegraf Egress and added to the InfluxDB.
 The following impairments can be linked:
 - delay
@@ -83,7 +87,7 @@ sudo clab-telemetry-linker set -n XR-1 -i Gi0-0-0-0 --delay 1ms --jitter 1ms --l
 
 ## Show
 ### Overview
-The `show` command is used to display the current network impairments applied to a specific ContainerLab node. This command provides a detailed view of the network settings, including delay, jitter, packet loss, and bandwidth rate for each interface.
+The `show` command displays the current network impairments applied to a ContainerLab node. This command provides a detailed view of the network settings, including each interface's delay, jitter, packet loss, and bandwidth rate.
 
 Command Syntax
 ```
