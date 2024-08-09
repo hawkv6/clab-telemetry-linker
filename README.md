@@ -44,7 +44,7 @@ sudo apt install ./clab-telemetry-linker_{version}_amd64.deb
 ### Using Binary
 ```
 git clone https://github.com/hawkv6/clab-telemetry-linker
-make binary
+cd clab-telemetry-linker && make binary
 sudo ./bin/clab-telemetry-linker
 ```
 
