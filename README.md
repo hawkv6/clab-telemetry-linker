@@ -49,11 +49,18 @@ sudo ./bin/clab-telemetry-linker
 ```
 
 ## Getting Started
-1. Start the collector pipeline. For more information, visit [hawkv6 deplopyment](https://github.com/hawkv6/deployment).
-2. Install the network. More detaild can be found at [hawkv6 testnetwork](https://github.com/hawkv6/network).
+
+1. Start the collector pipeline.
+   - For more information, visit the [hawkv6 deployment guide](https://github.com/hawkv6/deployment).
+
+2. Install the network.
+   - Detailed instructions can be found in the [hawkv6 testnetwork guide](https://github.com/hawkv6/network).
+
 3. Install `clab-telemetry-linker`.
+
 4. Set the initial impairments using the `set` command.
-5. Start the service with the `start` command.
+
+5. Start the service using the `start` command.
 
 ## Additional Info
 - The default configuration file is located at `$HOME/.clab-telemetry-linker/config.yaml`
