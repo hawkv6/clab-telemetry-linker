@@ -16,7 +16,7 @@
 ## Overview
 The clab-telemetry-linker service was developed to solve the missing performance measurement support issue in virtual XRd routers, leading to streaming telemetry messages with empty or fixed values. This service allows for the simulation of network impairments like delay, jitter, packet loss, and bandwidth limitations within a containerlab network. By utilizing the containerlab interface, the clab-telemetry-linker can adjust these impairments in the virtual network and populate the streaming telemetry with these values, plus or minus a random value. It can be used with [Jalapeno](https://github.com/cisco-open/jalapeno) or another similar tech stack using Telegraf, Kafka, and InfluxDB.
 
-![](docs/images/clab-telemetry-linker-overview.drawio.png)
+![](docs/images/clab-telemetry-linker-overview.drawio.svg)
 
 ### Functionality
 
@@ -28,127 +28,36 @@ The following impairments can be linked:
 - packet loss
 - bandwidth / rate
 
-## Start the service
-### Overview
-The `start` command is used to initiate the clab-telemetry-linker tool. This tool listens for telemetry data, enriches it with container lab impairments, and forwards it to a Kafka broker. Upon starting, the tool initiates several threads responsible for different threads:
-1. Consumer - consumes the messages from the receiver topic
-2. Processor - processes the messages according to the config (applied impairments)
-3. Publisher - publishes the messages to the publisher-topic
+## Usage
+- **Set Impairments** - [`set`](docs/set.md)
+- **Show Impairments** - [`show`](docs/show.md)
+- **Delete Impairments** - [`delete`](docs/delete.md)
+- **Start the Service** - [`start`](docs/start.md)
+- **Check Version** - `version`
 
-### Command Syntax
+## Installation 
+### Using Package Manager
+For Debian-based systems, install the package using `apt`:
+```bash
+sudo apt install ./clab-telemetry-linker_{version}_amd64.deb
 ```
-sudo clab-telemetry-linker start -b <kafka-host>:<port> -r <receiver-topic> -p <publisher-topic> 
+### Using Binary
 ```
-- `--broker <kafka-host:port>` or `-b <kafka-host>:<port>`: Specifies the Kafka broker host and port.
-- `--receiver-topic <receiver-topic>` or `-r <receiver-topic>`: Designates the Kafka topic to receive unprocessed telemetry data.
-- `--publisher-topic <publisher-topic>` or `-p <publisher-topic>`: Indicates the Kafka topic for publishing processed telemetry data.
-### Example
-To start the service with Kafka broker at 172.16.19.77:9094, receiving data from hawkv6.telemetry.unprocessed, and publishing to hawkv6.telemetry.processed:
-```
-sudo clab-telemetry-linker start -b 172.16.19.77:9094 -r hawkv6.telemetry.unprocessed -p hawkv6.telemetry.processed
-INFO[2024-01-21T11:31:19Z] Read config file:  /home/ins/.clab-telemetry-linker/config.yaml  subsystem=config
-INFO[2024-01-21T11:31:19Z] Start all services                            subsystem=service
-INFO[2024-01-21T11:31:19Z] Start consuming messages from broker 172.16.19.77:9094 and topic hawkv6.telemetry.unprocessed  subsystem=consumer
-INFO[2024-01-21T11:31:19Z] Starting processing messages                  subsystem=processor
-INFO[2024-01-21T11:31:19Z] Starting publishing messages to broker 172.16.19.77:9094 and topic hawkv6.telemetry.processed  subsystem=publisher
-
-^CINFO[2024-01-21T11:31:24Z] Received interrupt signal, shutting down      subsystem=cmd
-INFO[2024-01-21T11:31:24Z] Stopping all services                         subsystem=service
-INFO[2024-01-21T11:31:24Z] Stop consumer with values:  172.16.19.77:9094 hawkv6.telemetry.unprocessed  subsystem=consumer
-INFO[2024-01-21T11:31:24Z] Stopping processor                            subsystem=processor
-INFO[2024-01-21T11:31:24Z] Stopping publisher with broker  172.16.19.77:9094  and topic  hawkv6.telemetry.processed  subsystem=publisher
+git clone https://github.com/hawkv6/clab-telemetry-linker
+make binary
+sudo ./bin/clab-telemetry-linker
 ```
 
-## Set impairments
-### Overview
-The `set` command allows you to configure or overwrite network impairments on specific interfaces of a ContainerLab node. These impairments include delay, jitter, packet loss, and bandwidth rate limitation.
-### Command Syntax
-```
-sudo clab-telemetry-linker set -n <clab-node> -i <interface-name> --delay <value in ms> --jitter <value in ms>  --loss <value in %> --rate <value in kbit/s>
-```
-- `--node <clab-node>` or `-n <clab-node>`: Specify the ContainerLab node name.
-- `--interface <interface-name>` or`-i <interface-name>`: Designate the interface on the node to set impairments.
-- `--delay <value in ms>`or `-d <value in ms>`: Set the delay time in milliseconds.
-- `--jitter <value in ms>` or `-j <value in ms>`: Set the jitter value in milliseconds.
-- `--loss <value in %>` or `-l <value in %>`: Define the packet loss percentage.
-- `--rate <value in kbit/s>` or `-r <value in kbit/s>`: Limit the bandwidth rate in kilobits per second.
-
-
-### Example
-To set a delay of 1ms, jitter of 1ms, packet loss of 5%, and a rate limit of 100000 kbit/s on interface Gi0-0-0-0 of node XR-1:
-```
-sudo clab-telemetry-linker set -n XR-1 -i Gi0-0-0-0 --delay 1ms --jitter 1ms --loss 5 --rate 100000 
------------+-------+--------+-------------+-------------+
-| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-+-----------+-------+--------+-------------+-------------+
-| Gi0-0-0-0 | 1ms   | 1ms    | 5.00%       |      100000 |
-+-----------+-------+--------+-------------+-------------+
-```
-
-## Show
-### Overview
-The `show` command displays the current network impairments applied to a ContainerLab node. This command provides a detailed view of the network settings, including each interface's delay, jitter, packet loss, and bandwidth rate.
-
-Command Syntax
-```
-sudo clab-telemetry-linker show -n <clab-node>
-```
-- `--node <clab-node>` or  `n <clab-node>`: Specifies the ContainerLab node name for which you want to view the impairments.
-### Example
-To display the network impairments for the node XR-1:
-```
-sudo clab-telemetry-linker show -n XR-1
-+-----------+-------+--------+-------------+-------------+
-| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-+-----------+-------+--------+-------------+-------------+
-| lo        | N/A   | N/A    | N/A         | N/A         |
-| eth0      | N/A   | N/A    | N/A         | N/A         |
-| Gi0-0-0-0 | 0s    | 0s     | 0.00%       |           0 |
-| Gi0-0-0-1 | 4ms   | 0s     | 0.00%       |           0 |
-| Gi0-0-0-2 | 6ms   | 0s     | 5.00%       |           0 |
-+-----------+-------+--------+-------------+-------------+
-```
-
-
-## Delete
-### Overview
-The delete command is used to remove network impairments from a specific interface on a ContainerLab node. This action resets the network settings for the specified interface to their default state, which typically means no delay, jitter, packet loss, or rate limitation.
-
-### Command Syntax
-```
-clab-telemetry-linker delete -n <clab-node> -i <interface-name>
-```
-- `--node <clab-node>` or `-n <clab-node>`: Specifies the ContainerLab node name.
-- `--interface <interface-name>` or `-i <interface-name>`: Designates the specific interface on the node from which to delete impairments.
-### Examples
-To delete impairments from interface Gi0-0-0-0 on node XR-1:
-```
-clab-telemetry-linker delete -n XR-1 -i Gi0-0-0-0
-+-----------+-------+--------+-------------+-------------+
-| Interface | Delay | Jitter | Packet Loss | Rate (kbit) |
-+-----------+-------+--------+-------------+-------------+
-| Gi0-0-0-0 | 0ms   | 0s     | 0.00%       |           0 |
-+-----------+-------+--------+-------------+-------------+
-```
+## Getting Started
+1. Start the collector pipeline. For more information, visit [hawkv6 deplopyment](https://github.com/hawkv6/deployment).
+2. Install the network. More detaild can be found at [hawkv6 testnetwork](https://github.com/hawkv6/network).
+3. Install `clab-telemetry-linker`.
+4. Set the initial impairments using the `set` command.
+5. Start the service with the `start` command.
 
 ## Additional Info
-- clab-telemetry-linker will forward the impairments to the specific containerlab command (https://containerlab.dev/cmd/tools/netem/set/)
-- The default containerlab prefix is: "clab-hawkv6" (can be changed in config file)
-- The following models are used:
-```
-sensor-group delay
-  sensor-path Cisco-IOS-XR-perf-meas-oper:performance-measurement/nodes/node/interfaces/interface-details/interface-detail/delay-measurement-session/last-advertisement-information/advertised-values
- !
- sensor-group bandwidth
-  sensor-path Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface/interface-status-and-data/enabled/bandwidth
- !
- sensor-group packet-loss
-  sensor-path Cisco-IOS-XR-clns-isis-oper:isis/instances/instance/interfaces/interface/interface-status-and-data/enabled/packet-loss-percentage
- !
- sensor-group utilization
-  sensor-path openconfig-interfaces:interfaces/interface/state/counters/in-octets
-  sensor-path openconfig-interfaces:interfaces/interface/state/counters/out-octets
- !
-```
-- Detailed network configs can be found in https://github.com/hawkv6/network/tree/hawk9-clab-testnetwork/config
+- The default configuration file is located at `$HOME/.clab-telemetry-linker/config.yaml`
+- The default containerlab prefix is: `clab-hawkv6` (can be modified in the config file)
+- More details about network configurations are available in [network config documentation](docs/network-config.md)
 - Example telemetry messages can be found in the `examples` folder
+- clab-telemetry-linker forwards impairments to the relevant containerlab command. More information can be found [here][https://containerlab.dev/cmd/tools/netem/set/]
