@@ -37,7 +37,7 @@ clab-telemetry-linker [command]
 - **Set Impairments** - [`set`](docs/set.md)
 - **Show Impairments** - [`show`](docs/show.md)
 - **Delete Impairments** - [`delete`](docs/delete.md)
-- **Start the Service** - [`start`](docs/start.md)
+- **Start Service** - [`start`](docs/start.md)
 - **Print Version** - `version`
 
 ## Installation 
@@ -56,10 +56,10 @@ sudo ./bin/clab-telemetry-linker
 ## Getting Started
 
 1. Start the collector pipeline.
-   - For more information, visit the [hawkv6 deployment guide](https://github.com/hawkv6/deployment).
+   - For more information, visit the [hawkv6 deployment documentation](https://github.com/hawkv6/deployment).
 
 2. Install the network.
-   - Detailed instructions can be found in the [hawkv6 testnetwork guide](https://github.com/hawkv6/network).
+   - Detailed instructions can be found in the [hawkv6 testnetwork documentation](https://github.com/hawkv6/network).
 
 3. Install `clab-telemetry-linker`.
 
