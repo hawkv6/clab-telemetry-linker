@@ -29,11 +29,16 @@ The following impairments can be linked:
 - bandwidth / rate
 
 ## Usage
+```
+clab-telemetry-linker [command]
+```
+
+### Commands
 - **Set Impairments** - [`set`](docs/set.md)
 - **Show Impairments** - [`show`](docs/show.md)
 - **Delete Impairments** - [`delete`](docs/delete.md)
 - **Start the Service** - [`start`](docs/start.md)
-- **Check Version** - `version`
+- **Print Version** - `version`
 
 ## Installation 
 ### Using Package Manager
