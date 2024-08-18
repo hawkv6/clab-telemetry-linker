@@ -71,5 +71,5 @@ sudo ./bin/clab-telemetry-linker
 - The default configuration file is located at `$HOME/.clab-telemetry-linker/config.yaml`
 - The default containerlab prefix is: `clab-hawkv6` (can be modified in the config file)
 - More details about network configurations are available in [network config documentation](docs/network-config.md)
-- Example telemetry messages can be found in the `examples` folder
+- Example telemetry messages can be found in the [`examples`](examples) folder
 - clab-telemetry-linker forwards impairments to the relevant containerlab command. More information can be found [here](https://containerlab.dev/cmd/tools/netem/set/)
