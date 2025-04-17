@@ -116,6 +116,7 @@ func (config *DefaultConfig) InitConfig() error {
 		if err := config.createConfig(); err != nil {
 			return err
 		}
+		return config.WriteConfig()
 	}
 	if err := config.readConfig(); err != nil {
 		return err
